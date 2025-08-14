@@ -33,7 +33,13 @@ export const authService = {
         throw new Error("User not found");
       }
 
-      const userData = userDoc.data() as UserProfile;
+      const raw = userDoc.data();
+      const userData: UserProfile = {
+        uid: firebaseUser.uid,
+        email: raw.email ?? firebaseUser.email ?? "",
+        role: raw.role ?? "partial",
+        allowedPaths: Array.isArray(raw.allowedPaths) ? raw.allowedPaths : [],
+      };
       return userData;
     } catch (error) {
       throw new Error("Failed to login" + error);
@@ -60,6 +66,8 @@ export const authService = {
       const userData: UserProfile = {
         uid: firebaseUser.uid,
         email: firebaseUser.email ?? credentials.email,
+        role: "partial",
+        allowedPaths: [],
         ...(firebaseUser.displayName
           ? { displayName: firebaseUser.displayName }
           : {}),

@@ -1,0 +1,66 @@
+.login-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.login-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  padding: 40px;
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+}
+
+.login-header {
+  margin-bottom: 32px;
+}
+
+.company-logo {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1e3a8a;
+  line-height: 1.2;
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+}
+
+.company-subtitle {
+  font-size: 14px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.login-footer {
+  margin-top: 24px;
+  text-align: center;
+}
+
+.forgot-password {
+  color: #1e3a8a;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.forgot-password:hover {
+  color: #3730a3;
+  text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+  .login-card {
+    padding: 24px;
+    margin: 16px;
+  }
+
+  .company-logo {
+    font-size: 20px;
+  }
+}
