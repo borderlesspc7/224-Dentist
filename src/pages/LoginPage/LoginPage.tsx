@@ -1,22 +1,20 @@
 import React from "react";
+import { useAuth } from "../../hooks/useAuth";
+import { useNavigation } from "../../hooks/useNavigation";
 import LoginForm from "../../components/LoginForm/LoginForm";
 import "./LoginPage.css";
 
 const LoginPage: React.FC = () => {
+  const { login } = useAuth();
+  const { goTo } = useNavigation();
+
   const handleLogin = async (
-    username: string,
+    email: string,
     password: string
   ): Promise<void> => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        if (username === "admin" && password === "password") {
-          console.log("Login successful");
-          resolve();
-        } else {
-          reject(new Error("Invalid credentials"));
-        }
-      }, 1500);
-    });
+    await login({ email, password });
+    // Login bem-sucedido, redireciona para admin
+    goTo("/admin");
   };
 
   return (

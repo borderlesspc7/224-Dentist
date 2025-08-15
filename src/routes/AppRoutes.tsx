@@ -2,13 +2,11 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { paths } from "./paths";
 import { ProtectedRoute } from "./ProtectedRoute";
 import LoginPage from "../pages/LoginPage/LoginPage";
+import AdminRoutes from "./AdminRoutes";
 
 export default function AppRoutes() {
   function Register() {
     return <div>Register</div>;
-  }
-  function Menu() {
-    return <div>Menu</div>;
   }
 
   return (
@@ -19,10 +17,10 @@ export default function AppRoutes() {
         <Route path={paths.register} element={<Register />} />
         <Route path="*" element={<LoginPage />} />
         <Route
-          path={paths.menu}
+          path="/admin/*"
           element={
-            <ProtectedRoute required={paths.menu}>
-              <Menu />
+            <ProtectedRoute required="admin">
+              <AdminRoutes />
             </ProtectedRoute>
           }
         />

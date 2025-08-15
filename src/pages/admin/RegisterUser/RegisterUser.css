@@ -1,0 +1,116 @@
+.register-user-content {
+  padding: 24px 32px 40px;
+}
+
+.content-header {
+  margin: 8px auto 24px;
+  max-width: 720px;
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 4px;
+}
+
+.page-subtitle {
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+/* Form Container */
+.form-container {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 24px 24px 28px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  border: 1px solid #e2e8f0;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.user-form {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Form Group for Role Select */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.form-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #0f172a;
+}
+
+.required {
+  color: #ef4444;
+  margin-left: 2px;
+}
+
+.role-select {
+  padding: 12px 14px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #0f172a;
+  background: #ffffff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.role-select:focus {
+  outline: none;
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+}
+
+/* Form Actions */
+.form-actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #e2e8f0;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .register-user-content {
+    padding: 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .register-user-content {
+    padding: 20px;
+  }
+
+  .form-container {
+    padding: 24px;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-title {
+    font-size: 24px;
+  }
+
+  .form-container {
+    padding: 20px;
+  }
+
+  .register-user-content {
+    padding: 16px;
+  }
+}

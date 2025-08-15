@@ -18,15 +18,15 @@
   border: 2px solid #e5e7eb;
   border-radius: 8px;
   font-size: 16px;
-  color: #374151;
+  color: #0f172a;
   background-color: #ffffff;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
   outline: none;
 }
 
 .input-field:focus {
-  border-color: #1e3a8a;
-  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
 }
 
 .input-field:disabled {

@@ -11,19 +11,21 @@ interface LoginFormProps {
 }
 
 const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{
-    username?: string;
+    email?: string;
     password?: string;
   }>({});
 
   const validateForm = (): boolean => {
-    const newErrors: { username?: string; password?: string } = {};
+    const newErrors: { email?: string; password?: string } = {};
 
-    if (!username.trim()) {
-      newErrors.username = "Username is required";
+    if (!email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      newErrors.email = "Please enter a valid email";
     }
 
     if (!password.trim()) {
@@ -45,7 +47,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
 
     setLoading(true);
     try {
-      await onLogin(username, password);
+      await onLogin(email, password);
     } catch (error) {
       console.error("Login failed:", error);
     } finally {
@@ -56,13 +58,13 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
   return (
     <form onSubmit={handleSubmit} className="login-form">
       <Input
-        label="Username"
+        label="Email"
         type="text"
-        value={username}
-        onChange={setUsername}
-        placeholder="Enter your username"
+        value={email}
+        onChange={setEmail}
+        placeholder="Enter your email"
         required
-        error={errors.username}
+        error={errors.email}
         disabled={loading}
       />
 

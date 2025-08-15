@@ -1,4 +1,4 @@
-import { auth, db } from "../lib/firebaseconfig";
+import { auth, db, app } from "../lib/firebaseconfig";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -6,6 +6,8 @@ import {
   onAuthStateChanged,
   type Unsubscribe,
 } from "firebase/auth";
+import { getAuth as getAuthFromApp } from "firebase/auth";
+import { initializeApp, deleteApp } from "firebase/app";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import type { LoginCredentials, UserProfile } from "../types/user";
 
@@ -47,9 +49,12 @@ export const authService = {
   },
 
   async register(credentials: LoginCredentials): Promise<UserProfile> {
+    const secondaryApp = initializeApp(app.options, "secondary");
+    const secondaryAuth = getAuthFromApp(secondaryApp);
+
     try {
       const userCredential = await createUserWithEmailAndPassword(
-        auth,
+        secondaryAuth,
         credentials.email,
         credentials.password
       );
@@ -76,6 +81,9 @@ export const authService = {
       return userData;
     } catch (error) {
       throw new Error("Failed to register" + error);
+    } finally {
+      await secondaryAuth.signOut().catch(() => undefined);
+      await deleteApp(secondaryApp).catch(() => undefined);
     }
   },
 
