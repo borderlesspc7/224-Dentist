@@ -24,6 +24,22 @@
   border-color: #dc2626;
 }
 
+/* Disabled state */
+.multiselect.disabled .multiselect-trigger {
+  background-color: #f9fafb;
+  border-color: #e5e7eb;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.multiselect.disabled .multiselect-value {
+  color: #9ca3af;
+}
+
+.multiselect.disabled .multiselect-arrow {
+  color: #9ca3af;
+}
+
 .multiselect-value {
   font-size: 14px;
   color: #0f172a;

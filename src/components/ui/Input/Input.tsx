@@ -44,9 +44,8 @@ const Input: React.FC<InputProps> = ({
         disabled={disabled}
         className={inputClasses}
         required={required}
-      >
-        {error && <div className="input-error">{error}</div>}
-      </input>
+      />
+      {error && <div className="input-error">{error}</div>}
     </div>
   );
 };

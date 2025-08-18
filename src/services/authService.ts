@@ -9,7 +9,11 @@ import {
 import { getAuth as getAuthFromApp } from "firebase/auth";
 import { initializeApp, deleteApp } from "firebase/app";
 import { doc, setDoc, getDoc } from "firebase/firestore";
-import type { LoginCredentials, UserProfile } from "../types/user";
+import type {
+  LoginCredentials,
+  RegisterCredentials,
+  UserProfile,
+} from "../types/user";
 
 export const authService = {
   async logOut(): Promise<void> {
@@ -48,8 +52,9 @@ export const authService = {
     }
   },
 
-  async register(credentials: LoginCredentials): Promise<UserProfile> {
-    const secondaryApp = initializeApp(app.options, "secondary");
+  async register(credentials: RegisterCredentials): Promise<UserProfile> {
+    const name = `secondary-${Date.now()}`; // Unique name for secondary app
+    const secondaryApp = initializeApp(app.options, name);
     const secondaryAuth = getAuthFromApp(secondaryApp);
 
     try {
@@ -60,29 +65,25 @@ export const authService = {
       );
       const firebaseUser = userCredential.user;
 
-      if (!firebaseUser.email) {
-        throw new Error("Email is required");
-      }
-
-      if (!firebaseUser.displayName) {
-        throw new Error("Display name is required");
-      }
-
+      // Create user profile without password
       const userData: UserProfile = {
         uid: firebaseUser.uid,
         email: firebaseUser.email ?? credentials.email,
-        role: "partial",
-        allowedPaths: [],
-        ...(firebaseUser.displayName
-          ? { displayName: firebaseUser.displayName }
-          : {}),
+        displayName: credentials.displayName,
+        role: credentials.role,
+        allowedPaths: credentials.allowedPaths || [],
       };
+
       await setDoc(doc(db, "users", firebaseUser.uid), userData);
       return userData;
     } catch (error) {
-      throw new Error("Failed to register" + error);
+      throw new Error(
+        "Failed to register: " +
+          (error instanceof Error ? error.message : String(error))
+      );
     } finally {
-      await secondaryAuth.signOut().catch(() => undefined);
+      // Ensure secondary app is signed out and deleted
+      await signOut(secondaryAuth).catch(() => undefined);
       await deleteApp(secondaryApp).catch(() => undefined);
     }
   },

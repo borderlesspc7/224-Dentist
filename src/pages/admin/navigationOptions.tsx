@@ -15,42 +15,42 @@ interface PathOption {
 export const pathOptions: PathOption[] = [
   {
     value: "cadastro-usuario",
-    label: "Cadastro de Usuário",
+    label: "Register User",
     icon: <UserPlusIcon />,
   },
   {
     value: "cadastro-servico",
-    label: "Cadastro de Serviço",
+    label: "Register Service",
     icon: <ServerIcon />,
   },
   {
     value: "cadastro-clientes",
-    label: "Cadastro de Clientes",
+    label: "Register Clients",
     icon: <UsersIcon />,
   },
   {
     value: "cadastro-funcionario",
-    label: "Cadastro de Funcionário",
+    label: "Register Employee",
     icon: <UserPlusIcon />,
   },
   {
     value: "cadastro-subcontratados",
-    label: "Cadastro de Subcontratados",
+    label: "Register Subcontractors",
     icon: <UserPlusIcon />,
   },
   {
     value: "cadastro-servicos-contratados",
-    label: "Cadastro de Serviços Contratados",
+    label: "Register Contract Services",
     icon: <ServerIcon />,
   },
   {
     value: "cadastro-financiamentos",
-    label: "Cadastro de Financiamentos",
+    label: "Register Financings",
     icon: <CreditCardIcon />,
   },
   {
     value: "cadastro-veiculos",
-    label: "Cadastro de Veículos",
+    label: "Register Vehicles",
     icon: <CarIcon />,
   },
 ];

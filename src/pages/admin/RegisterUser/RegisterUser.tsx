@@ -6,8 +6,10 @@ import { useState } from "react";
 import Input from "../../../components/ui/Input/Input";
 import MultiSelect from "../../../components/ui/MultiSelect/MultiSelect";
 import Button from "../../../components/ui/Button/Button";
-import { pathOptions } from "./navigationOptions";
+import { pathOptions } from "../navigationOptions";
 import "./RegisterUser.css";
+import { authService } from "../../../services/authService";
+import type { RegisterCredentials } from "../../../types/user";
 
 interface FormData {
   email: string;
@@ -22,6 +24,7 @@ interface FormErrors {
   password?: string;
   displayName?: string;
   allowedPaths?: string;
+  submit?: string;
 }
 
 const RegisterUserPage: React.FC = () => {
@@ -42,16 +45,28 @@ const RegisterUserPage: React.FC = () => {
 
   // Validation errors
   const [errors, setErrors] = useState<FormErrors>({});
+  const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const isAdmin = formData.role === "admin";
 
   // Handle input changes
   const handleInputChange = (
     field: keyof FormData,
     value: string | string[]
   ) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+    setFormData((prev) => {
+      const newData = {
+        ...prev,
+        [field]: value,
+      };
+
+      // Clear allowedPaths when role changes to admin
+      if (field === "role" && value === "admin") {
+        newData.allowedPaths = [];
+      }
+
+      return newData;
+    });
 
     // Clear error when user starts typing
     if (errors[field as keyof FormErrors]) {
@@ -59,6 +74,11 @@ const RegisterUserPage: React.FC = () => {
         ...prev,
         [field]: "",
       }));
+    }
+
+    // Clear success message when user starts typing
+    if (successMessage) {
+      setSuccessMessage("");
     }
   };
 
@@ -82,7 +102,8 @@ const RegisterUserPage: React.FC = () => {
       newErrors.displayName = "Display name is required";
     }
 
-    if (formData.allowedPaths.length === 0) {
+    // Only validate allowedPaths for non-admin users
+    if (formData.role === "partial" && formData.allowedPaths.length === 0) {
       newErrors.allowedPaths = "Please select at least one allowed path";
     }
 
@@ -91,14 +112,49 @@ const RegisterUserPage: React.FC = () => {
   };
 
   // Handle form submission
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (validateForm()) {
-      console.log("User data to save:", formData);
-      alert(
-        "User created successfully! (This will be integrated with backend)"
-      );
+    if (!validateForm()) return;
+
+    setLoading(true);
+    setSuccessMessage("");
+    setErrors({});
+
+    try {
+      const newUser: RegisterCredentials = {
+        email: formData.email,
+        password: formData.password, // Agora password é obrigatório
+        displayName: formData.displayName,
+        role: formData.role,
+        allowedPaths: formData.allowedPaths,
+      };
+
+      await authService.register(newUser);
+      setSuccessMessage("User created successfully!");
+
+      // Limpar o formulário mas manter a mensagem de sucesso
+      setFormData({
+        email: "",
+        password: "",
+        displayName: "",
+        role: "partial",
+        allowedPaths: [],
+      });
+      setErrors({});
+
+      // Limpar a mensagem de sucesso após 3 segundos
+      setTimeout(() => {
+        setSuccessMessage("");
+      }, 3000);
+    } catch (error) {
+      setErrors({
+        submit:
+          "Failed to create user: " +
+          (error instanceof Error ? error.message : String(error)),
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -112,6 +168,7 @@ const RegisterUserPage: React.FC = () => {
       allowedPaths: [],
     });
     setErrors({});
+    setSuccessMessage("");
   };
 
   return (
@@ -125,6 +182,20 @@ const RegisterUserPage: React.FC = () => {
       </div>
 
       <div className="form-container">
+        {/* Success Message */}
+        {successMessage && (
+          <div className="success-message">
+            <span>✓ {successMessage}</span>
+          </div>
+        )}
+
+        {/* Error Message */}
+        {errors.submit && (
+          <div className="error-message">
+            <span>✗ {errors.submit}</span>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="user-form">
           {/* Email Field */}
           <Input
@@ -168,6 +239,7 @@ const RegisterUserPage: React.FC = () => {
                 handleInputChange("role", e.target.value as "partial" | "admin")
               }
               className="role-select"
+              disabled={loading}
             >
               <option value="partial">Partial Access</option>
               <option value="admin">Administrator</option>
@@ -182,15 +254,21 @@ const RegisterUserPage: React.FC = () => {
             onChange={(value) => handleInputChange("allowedPaths", value)}
             placeholder="Select accessible pages..."
             error={errors.allowedPaths}
-            required
+            required={!isAdmin}
+            disabled={isAdmin || loading}
           />
 
           {/* Form Actions */}
           <div className="form-actions">
-            <Button type="submit" variant="primary">
-              Save User
+            <Button type="submit" variant="primary" disabled={loading}>
+              {loading ? "Creating User..." : "Save User"}
             </Button>
-            <Button type="button" variant="secondary" onClick={handleCancel}>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={handleCancel}
+              disabled={loading}
+            >
               Cancel
             </Button>
           </div>

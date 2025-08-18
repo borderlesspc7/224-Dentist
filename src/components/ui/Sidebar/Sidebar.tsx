@@ -1,7 +1,7 @@
 import "./Sidebar.css";
 import { NavLink, useLocation } from "react-router-dom";
 import React from "react";
-import { pathOptions } from "../../../pages/admin/RegisterUser/navigationOptions";
+import { pathOptions } from "../../../pages/admin/navigationOptions";
 
 interface SidebarProps {
   Logo: React.ComponentType;

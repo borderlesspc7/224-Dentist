@@ -1,18 +1,15 @@
-import React from "react";
 import { Routes, Route } from "react-router-dom";
 import AdminLayout from "../pages/admin/AdminLayout";
 import RegisterUser from "../pages/admin/RegisterUser/RegisterUser";
+import RegisterService from "../pages/admin/RegisterService/RegisterService";
 
 export default function AdminRoutes() {
   return (
     <Routes>
       <Route path="/" element={<AdminLayout />}>
-        <Route index element={<div>Dashboard (em breve)</div>} />
+        <Route index element={<RegisterUser />} />
         <Route path="cadastro-usuario" element={<RegisterUser />} />
-        <Route
-          path="cadastro-servico"
-          element={<div>Cadastro de Serviço (em breve)</div>}
-        />
+        <Route path="cadastro-servico" element={<RegisterService />} />
         <Route
           path="cadastro-clientes"
           element={<div>Cadastro de Clientes (em breve)</div>}

@@ -17,6 +17,7 @@ interface MultiSelectProps {
   placeholder?: string;
   error?: string;
   required?: boolean;
+  disabled?: boolean;
 }
 
 const MultiSelect: React.FC<MultiSelectProps> = ({
@@ -27,6 +28,7 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
   placeholder = "Select options...",
   error,
   required = false,
+  disabled = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -57,8 +59,15 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
         {label}
         {required && <span className="required">*</span>}
       </label>
-      <div className={`multiselect ${error ? "error" : ""}`}>
-        <div className="multiselect-trigger" onClick={handleToggle}>
+      <div
+        className={`multiselect ${error ? "error" : ""} ${
+          disabled ? "disabled" : ""
+        }`}
+      >
+        <div
+          className="multiselect-trigger"
+          onClick={!disabled ? handleToggle : undefined}
+        >
           <span className="multiselect-value">{getDisplayText()}</span>
           <span className={`multiselect-arrow ${isOpen ? "open" : ""}`}>▼</span>
         </div>
