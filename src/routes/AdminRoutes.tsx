@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import AdminLayout from "../pages/admin/AdminLayout";
 import RegisterUser from "../pages/admin/RegisterUser/RegisterUser";
 import RegisterService from "../pages/admin/RegisterService/RegisterService";
+import RegisterClient from "../pages/admin/RegisterClient/RegisterClient";
 
 export default function AdminRoutes() {
   return (
@@ -10,10 +11,7 @@ export default function AdminRoutes() {
         <Route index element={<RegisterUser />} />
         <Route path="cadastro-usuario" element={<RegisterUser />} />
         <Route path="cadastro-servico" element={<RegisterService />} />
-        <Route
-          path="cadastro-clientes"
-          element={<div>Cadastro de Clientes (em breve)</div>}
-        />
+        <Route path="cadastro-clientes" element={<RegisterClient />} />
         <Route
           path="cadastro-funcionario"
           element={<div>Cadastro de Funcionário (em breve)</div>}

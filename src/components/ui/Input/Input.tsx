@@ -5,7 +5,7 @@ import "./Input.css";
 
 interface InputProps {
   label?: string;
-  type?: "text" | "password" | "email";
+  type?: "text" | "password" | "email" | "date";
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
@@ -25,6 +25,8 @@ const Input: React.FC<InputProps> = ({
   error,
   disabled = false,
   className = "",
+  min,
+  max,
 }) => {
   const inputClasses = ["input-field", error ? "error" : "", className]
     .filter(Boolean)
@@ -44,6 +46,8 @@ const Input: React.FC<InputProps> = ({
         disabled={disabled}
         className={inputClasses}
         required={required}
+        min={min}
+        max={max}
       />
       {error && <div className="input-error">{error}</div>}
     </div>

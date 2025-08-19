@@ -7,6 +7,7 @@ import Input from "../../../components/ui/Input/Input";
 import MultiSelect from "../../../components/ui/MultiSelect/MultiSelect";
 import Button from "../../../components/ui/Button/Button";
 import { pathOptions } from "../navigationOptions";
+import "../../../styles/forms.css";
 import "./RegisterUser.css";
 import { authService } from "../../../services/authService";
 import type { RegisterCredentials } from "../../../types/user";
@@ -172,91 +173,105 @@ const RegisterUserPage: React.FC = () => {
   };
 
   return (
-    <div className="register-user-content">
+    <div className="form-page-content">
       <div className="content-header">
         <h1 className="page-title">Create New User</h1>
         <p className="page-subtitle">
           Add a new user to the system with specific permissions and access
-          rights.
+          rights
         </p>
       </div>
 
-      <div className="form-container">
+      <div className={`form-container ${loading ? "form-loading" : ""}`}>
         {/* Success Message */}
         {successMessage && (
-          <div className="success-message">
-            <span>✓ {successMessage}</span>
-          </div>
+          <div className="status-message success-message">{successMessage}</div>
         )}
 
         {/* Error Message */}
         {errors.submit && (
-          <div className="error-message">
-            <span>✗ {errors.submit}</span>
-          </div>
+          <div className="status-message error-message">{errors.submit}</div>
         )}
 
-        <form onSubmit={handleSubmit} className="user-form">
-          {/* Email Field */}
-          <Input
-            label="Email Address"
-            type="email"
-            value={formData.email}
-            onChange={(e) => handleInputChange("email", e)}
-            placeholder="user@company.com"
-            error={errors.email}
-            required
-          />
-
-          <Input
-            label="Password"
-            type="password"
-            value={formData.password}
-            onChange={(e) => handleInputChange("password", e)}
-            placeholder="Enter secure password"
-            error={errors.password}
-            required
-          />
-
-          <Input
-            label="Display Name"
-            type="text"
-            value={formData.displayName}
-            onChange={(e) => handleInputChange("displayName", e)}
-            placeholder="John Doe"
-            error={errors.displayName}
-            required
-          />
-
-          {/* Role Selection */}
-          <div className="form-group">
-            <label className="form-label">
-              Role <span className="required">*</span>
-            </label>
-            <select
-              value={formData.role}
-              onChange={(e) =>
-                handleInputChange("role", e.target.value as "partial" | "admin")
-              }
-              className="role-select"
+        <form onSubmit={handleSubmit} className="modern-form">
+          {/* User Information Section */}
+          <div className="form-section">
+            <h3 className="form-section-title">👤 User Information</h3>
+            <Input
+              label="Email Address"
+              type="email"
+              value={formData.email}
+              onChange={(e) => handleInputChange("email", e)}
+              placeholder="user@company.com"
+              error={errors.email}
+              required
               disabled={loading}
-            >
-              <option value="partial">Partial Access</option>
-              <option value="admin">Administrator</option>
-            </select>
+            />
+            <div className="form-row">
+              <Input
+                label="Display Name"
+                type="text"
+                value={formData.displayName}
+                onChange={(e) => handleInputChange("displayName", e)}
+                placeholder="John Doe"
+                error={errors.displayName}
+                required
+                disabled={loading}
+              />
+              <Input
+                label="Password"
+                type="password"
+                value={formData.password}
+                onChange={(e) => handleInputChange("password", e)}
+                placeholder="Enter secure password"
+                error={errors.password}
+                required
+                disabled={loading}
+              />
+            </div>
           </div>
 
-          {/* Allowed Paths Multi-Select */}
-          <MultiSelect
-            label="Allowed Paths"
-            options={pathOptionsForForm}
-            value={formData.allowedPaths}
-            onChange={(value) => handleInputChange("allowedPaths", value)}
-            placeholder="Select accessible pages..."
-            error={errors.allowedPaths}
-            required={!isAdmin}
-            disabled={isAdmin || loading}
-          />
+          {/* Role and Permissions Section */}
+          <div className="form-section">
+            <h3 className="form-section-title">🔐 Role & Permissions</h3>
+            <div className="form-group">
+              <label className="form-label">
+                User Role <span className="required">*</span>
+              </label>
+              <select
+                value={formData.role}
+                onChange={(e) =>
+                  handleInputChange(
+                    "role",
+                    e.target.value as "partial" | "admin"
+                  )
+                }
+                className="role-select"
+                disabled={loading}
+              >
+                <option value="partial">Partial Access User</option>
+                <option value="admin">Administrator</option>
+              </select>
+              <small className="form-help-text">
+                {isAdmin
+                  ? "Administrators have full access to all system features"
+                  : "Partial access users can only access selected pages"}
+              </small>
+            </div>
+
+            {!isAdmin && (
+              <MultiSelect
+                label="Allowed Pages"
+                options={pathOptionsForForm}
+                value={formData.allowedPaths}
+                onChange={(value) => handleInputChange("allowedPaths", value)}
+                placeholder="Select which pages this user can access..."
+                error={errors.allowedPaths}
+                required={!isAdmin}
+                disabled={isAdmin || loading}
+              />
+            )}
+          </div>
 
           {/* Form Actions */}
           <div className="form-actions">

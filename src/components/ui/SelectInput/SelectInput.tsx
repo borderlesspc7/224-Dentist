@@ -17,6 +17,7 @@ interface SelectInputProps {
   placeholder?: string;
   error?: string;
   required?: boolean;
+  disabled?: boolean;
 }
 
 const SelectInput: React.FC<SelectInputProps> = ({
@@ -27,6 +28,7 @@ const SelectInput: React.FC<SelectInputProps> = ({
   placeholder = "Select an option",
   error,
   required = false,
+  disabled = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -52,7 +54,11 @@ const SelectInput: React.FC<SelectInputProps> = ({
         {required && <span className="required">*</span>}
       </label>
       <div className={`select-input ${error ? "error" : ""}`}>
-        <div className="select-trigger" onClick={handleToggle}>
+        <div
+          className="select-trigger"
+          onClick={handleToggle}
+          style={{ cursor: disabled ? "not-allowed" : "pointer" }}
+        >
           <span className="select-value">{getDisplayText()}</span>
           <span className={`select-arrow ${isOpen ? "open" : ""}`}>▼</span>
         </div>

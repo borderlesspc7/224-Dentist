@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import "../../../styles/forms.css";
 import "./RegisterService.css";
 import SelectInput from "../../../components/ui/SelectInput/SelectInput";
 import Button from "../../../components/ui/Button/Button";
@@ -128,57 +129,70 @@ const RegisterServicePage: React.FC = () => {
   };
 
   return (
-    <div className="register-service-content">
+    <div className="form-page-content">
       <div className="content-header">
         <h1 className="page-title">Register Service</h1>
-        <p className="page-subtitle">Create a new service</p>
+        <p className="page-subtitle">
+          Create a new service with billing configuration and pricing details
+        </p>
       </div>
 
-      <div className="form-container">
+      <div className={`form-container ${loading ? "form-loading" : ""}`}>
         {/* Success Message */}
         {successMessage && (
-          <div className="success-message">
-            <span>✓ {successMessage}</span>
-          </div>
+          <div className="status-message success-message">{successMessage}</div>
         )}
 
         {/* Error Message */}
         {errors.submit && (
-          <div className="error-message">
-            <span>✗ {errors.submit}</span>
-          </div>
+          <div className="status-message error-message">{errors.submit}</div>
         )}
 
-        <form onSubmit={handleSubmit} className="service-form">
-          <Input
-            label="Service Code"
-            type="text"
-            value={formData.serviceCode}
-            onChange={(value) => handleInputChange("serviceCode", value)}
-            placeholder="Enter service code"
-            error={errors.serviceCode}
-            required
-          />
+        <form onSubmit={handleSubmit} className="modern-form">
+          {/* Service Information Section */}
+          <div className="form-section">
+            <h3 className="form-section-title">🛠️ Service Information</h3>
+            <div className="form-row">
+              <Input
+                label="Service Code"
+                type="text"
+                value={formData.serviceCode}
+                onChange={(value) => handleInputChange("serviceCode", value)}
+                placeholder="SRV-001"
+                error={errors.serviceCode}
+                required
+                disabled={loading}
+              />
+              <Input
+                label="Service Name"
+                type="text"
+                value={formData.serviceName}
+                onChange={(value) => handleInputChange("serviceName", value)}
+                placeholder="Enter descriptive service name"
+                error={errors.serviceName}
+                required
+                disabled={loading}
+              />
+            </div>
+          </div>
 
-          <Input
-            label="Service Name"
-            type="text"
-            value={formData.serviceName}
-            onChange={(value) => handleInputChange("serviceName", value)}
-            placeholder="Enter service name"
-            error={errors.serviceName}
-            required
-          />
-
-          <SelectInput
-            label="Billing Unit"
-            options={billingUnitOptions}
-            value={formData.billingUnit}
-            onChange={(value) => handleInputChange("billingUnit", value)}
-            placeholder="Select billing unit"
-            error={errors.billingUnit}
-            required
-          />
+          {/* Billing Configuration Section */}
+          <div className="form-section">
+            <h3 className="form-section-title">💰 Billing Configuration</h3>
+            <SelectInput
+              label="Billing Unit"
+              options={billingUnitOptions}
+              value={formData.billingUnit}
+              onChange={(value) => handleInputChange("billingUnit", value)}
+              placeholder="Select how this service is billed"
+              error={errors.billingUnit}
+              required
+              disabled={loading}
+            />
+            <small className="form-help-text">
+              Choose the unit of measurement for billing this service to clients
+            </small>
+          </div>
 
           <div className="form-actions">
             <Button type="submit" variant="primary" disabled={loading}>

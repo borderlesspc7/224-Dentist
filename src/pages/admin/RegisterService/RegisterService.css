@@ -1,128 +1,200 @@
-.register-service-content {
+/* RegisterService specific styles - extends forms.css */
+
+/* Billing unit specific styling */
+.billing-unit-info {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: 24px 32px 40px;
-  min-height: 100%;
-}
-
-.content-header {
-  margin: 8px auto 24px;
-  max-width: 720px;
-  width: 100%;
-  text-align: center;
-}
-
-.page-title {
-  font-size: 28px;
-  font-weight: 700;
-  color: #0f172a;
-  margin-bottom: 8px;
-}
-
-.page-subtitle {
-  font-size: 16px;
-  color: #64748b;
-  line-height: 1.5;
-}
-
-/* Success and Error Messages */
-.success-message {
-  background-color: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  border-radius: 8px;
-  padding: 12px 16px;
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.success-message span {
-  color: #166534;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.error-message {
-  background-color: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: 8px;
-  padding: 12px 16px;
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.error-message span {
-  color: #dc2626;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-/* Form Container */
-.form-container {
-  background: white;
-  border-radius: 12px;
-  padding: 32px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
-  max-width: 720px;
-  width: 100%;
-  margin: 0 auto;
-}
-
-.service-form {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.form-actions {
-  display: flex;
   gap: 12px;
-  justify-content: flex-end;
+  margin-top: 16px;
+  padding: 16px;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border: 1px solid #bae6fd;
+  border-radius: 12px;
+}
+
+.billing-unit-info h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0369a1;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.billing-unit-info h4::before {
+  content: "💡";
+  font-size: 16px;
+}
+
+.billing-options {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.billing-option {
+  padding: 12px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: white;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.billing-option:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
+}
+
+.billing-option.selected {
+  border-color: #3b82f6;
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+}
+
+.billing-option-title {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.billing-option-desc {
+  font-size: 12px;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+/* Service type indicators */
+.service-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.service-type-badge.professional {
+  background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+  color: #7c3aed;
+  border: 1px solid #a855f7;
+}
+
+.service-type-badge.maintenance {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #92400e;
+  border: 1px solid #f59e0b;
+}
+
+.service-type-badge.consultation {
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  color: #065f46;
+  border: 1px solid #10b981;
+}
+
+/* Enhanced form help text */
+.form-help-text {
+  font-size: 13px;
+  color: #6b7280;
   margin-top: 8px;
+  line-height: 1.4;
+  padding: 8px 12px;
+  background: #f9fafb;
+  border-left: 3px solid #e5e7eb;
+  border-radius: 0 8px 8px 0;
 }
 
-/* Responsive Design */
+/* Service code formatting */
+.service-code-input {
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Billing unit preview */
+.billing-preview {
+  margin-top: 16px;
+  padding: 16px;
+  background: linear-gradient(135deg, #fefce8 0%, #fef3c7 100%);
+  border: 1px solid #fbbf24;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.billing-preview-icon {
+  width: 40px;
+  height: 40px;
+  background: #f59e0b;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.billing-preview-content h4 {
+  margin: 0 0 4px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #92400e;
+}
+
+.billing-preview-content p {
+  margin: 0;
+  font-size: 12px;
+  color: #a16207;
+  line-height: 1.4;
+}
+
+/* Loading states */
+.form-loading .service-code-input {
+  background-color: #f3f4f6;
+}
+
+/* Animations */
+.billing-unit-change {
+  animation: billingChange 0.3s ease-in-out;
+}
+
+@keyframes billingChange {
+  0% {
+    opacity: 0.7;
+    transform: translateY(-4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive design */
 @media (max-width: 768px) {
-  .register-service-page {
-    padding: 16px;
+  .billing-options {
+    grid-template-columns: 1fr;
   }
 
-  .form-container {
-    padding: 24px 16px;
-  }
-
-  .page-title {
-    font-size: 24px;
-  }
-
-  .form-actions {
-    flex-direction: column-reverse;
-    gap: 12px;
-  }
-
-  .form-actions button {
-    width: 100%;
+  .billing-preview {
+    flex-direction: column;
+    text-align: center;
   }
 }
 
-@media (max-width: 480px) {
-  .register-service-page {
-    padding: 12px;
-  }
+/* Accessibility improvements */
+.billing-option:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
 
-  .form-container {
-    padding: 20px 12px;
-  }
-
-  .page-title {
-    font-size: 22px;
-  }
-
-  .page-subtitle {
-    font-size: 14px;
+@media (prefers-reduced-motion: reduce) {
+  .billing-option,
+  .billing-unit-change {
+    transition: none;
+    animation: none;
   }
 }

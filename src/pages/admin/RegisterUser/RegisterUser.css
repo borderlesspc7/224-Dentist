@@ -1,157 +1,174 @@
-.register-user-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 24px 32px 40px;
-  min-height: 100%;
-}
+/* RegisterUser specific styles - extends forms.css */
 
-.content-header {
-  margin: 8px auto 24px;
-  max-width: 720px;
-  width: 100%;
-  text-align: center;
-}
-
-.page-title {
-  font-size: 24px;
-  font-weight: 700;
-  color: #0f172a;
-  margin-bottom: 4px;
-}
-
-.page-subtitle {
-  font-size: 13px;
-  color: #64748b;
-  line-height: 1.5;
-}
-
-/* Success and Error Messages */
-.success-message {
-  background-color: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  border-radius: 8px;
-  padding: 12px 16px;
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.success-message span {
-  color: #166534;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.error-message {
-  background-color: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: 8px;
-  padding: 12px 16px;
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.error-message span {
-  color: #dc2626;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-/* Form Container */
-.form-container {
-  background: white;
-  border-radius: 12px;
-  padding: 32px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
-  max-width: 720px;
-  width: 100%;
-  margin: 0 auto; /* Centraliza o container */
-}
-
-.user-form {
-  display: flex;
-  flex-direction: column;
-}
-
-/* Form Group for Role Select */
+/* Form group for select inputs */
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  margin-bottom: 20px;
+  gap: 8px;
+  margin-bottom: 0;
 }
 
 .form-label {
   font-size: 14px;
-  font-weight: 500;
-  color: #0f172a;
+  font-weight: 600;
+  color: #1f2937;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .required {
   color: #ef4444;
-  margin-left: 2px;
+  font-weight: bold;
 }
 
+/* Role select styling */
 .role-select {
-  padding: 12px 14px;
+  width: 100%;
+  padding: 14px 16px;
   border: 2px solid #e5e7eb;
-  border-radius: 8px;
-  font-size: 14px;
-  color: #0f172a;
-  background: #ffffff;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  border-radius: 12px;
+  font-size: 16px;
+  color: #111827;
+  background-color: #ffffff;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-sizing: border-box;
+  font-family: inherit;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  background-size: 16px;
+  padding-right: 48px;
+}
+
+.role-select:hover {
+  border-color: #d1d5db;
 }
 
 .role-select:focus {
   outline: none;
-  border-color: #0ea5e9;
-  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+  transform: translateY(-1px);
 }
 
-/* Form Actions */
-.form-actions {
-  display: flex;
-  gap: 16px;
-  margin-top: 32px;
-  padding-top: 24px;
-  border-top: 1px solid #e2e8f0;
+.role-select:disabled {
+  background-color: #f9fafb;
+  color: #9ca3af;
+  cursor: not-allowed;
+  border-color: #e5e7eb;
 }
 
-/* Responsive Design */
-@media (max-width: 1024px) {
-  .register-user-content {
-    padding: 24px;
+.role-select option {
+  padding: 12px;
+  font-size: 16px;
+}
+
+/* Help text */
+.form-help-text {
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 6px;
+  line-height: 1.4;
+  font-style: italic;
+}
+
+/* Role indicator badges */
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.role-badge.admin {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #92400e;
+  border: 1px solid #f59e0b;
+}
+
+.role-badge.partial {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  color: #1e40af;
+  border: 1px solid #3b82f6;
+}
+
+/* Enhanced MultiSelect integration */
+.form-section .multiselect-container {
+  margin-top: 8px;
+}
+
+/* Animation for role changes */
+.role-transition {
+  animation: roleChange 0.3s ease-in-out;
+}
+
+@keyframes roleChange {
+  0% {
+    opacity: 0.7;
+    transform: scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
   }
 }
 
+/* Responsive adjustments */
 @media (max-width: 768px) {
-  .register-user-content {
-    padding: 20px;
-  }
-
-  .form-container {
-    padding: 24px;
-  }
-
-  .form-actions {
-    flex-direction: column;
+  .role-select {
+    padding: 12px 14px;
+    padding-right: 44px;
+    background-size: 14px;
+    background-position: right 14px center;
   }
 }
 
-@media (max-width: 480px) {
-  .page-title {
-    font-size: 24px;
-  }
+/* Focus states for better accessibility */
+.form-group:focus-within .form-label {
+  color: #3b82f6;
+}
 
-  .form-container {
-    padding: 20px;
-  }
+/* Custom checkbox styling for future use */
+.custom-checkbox {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #e5e7eb;
+  border-radius: 4px;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
 
-  .register-user-content {
-    padding: 16px;
-  }
+.custom-checkbox:checked {
+  background-color: #3b82f6;
+  border-color: #3b82f6;
+}
+
+.custom-checkbox:checked::after {
+  content: "✓";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.custom-checkbox:hover {
+  border-color: #3b82f6;
+}
+
+.custom-checkbox:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
