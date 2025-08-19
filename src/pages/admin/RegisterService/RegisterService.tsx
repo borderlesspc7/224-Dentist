@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { FiSettings, FiDollarSign } from "react-icons/fi";
 import "../../../styles/forms.css";
 import "./RegisterService.css";
 import SelectInput from "../../../components/ui/SelectInput/SelectInput";
@@ -151,7 +152,10 @@ const RegisterServicePage: React.FC = () => {
         <form onSubmit={handleSubmit} className="modern-form">
           {/* Service Information Section */}
           <div className="form-section">
-            <h3 className="form-section-title">🛠️ Service Information</h3>
+            <h3 className="form-section-title">
+              <FiSettings className="section-icon" />
+              Service Information
+            </h3>
             <div className="form-row">
               <Input
                 label="Service Code"
@@ -178,7 +182,10 @@ const RegisterServicePage: React.FC = () => {
 
           {/* Billing Configuration Section */}
           <div className="form-section">
-            <h3 className="form-section-title">💰 Billing Configuration</h3>
+            <h3 className="form-section-title">
+              <FiDollarSign className="section-icon" />
+              Billing Configuration
+            </h3>
             <SelectInput
               label="Billing Unit"
               options={billingUnitOptions}

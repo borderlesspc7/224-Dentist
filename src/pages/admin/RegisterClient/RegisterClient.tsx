@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import { FiUser, FiMapPin, FiPhone, FiTool } from "react-icons/fi";
 import Input from "../../../components/ui/Input/Input";
 import Button from "../../../components/ui/Button/Button";
 import "../../../styles/forms.css";
@@ -207,7 +208,10 @@ const RegisterClientPage: React.FC = () => {
         <form onSubmit={handleSubmit} className="modern-form">
           {/* Client Information Section */}
           <div className="form-section">
-            <h3 className="form-section-title">👤 Client Information</h3>
+            <h3 className="form-section-title">
+              <FiUser className="section-icon" />
+              Client Information
+            </h3>
             <Input
               label="Client Name"
               type="text"
@@ -222,7 +226,10 @@ const RegisterClientPage: React.FC = () => {
 
           {/* Location Information Section */}
           <div className="form-section">
-            <h3 className="form-section-title">📍 Location Details</h3>
+            <h3 className="form-section-title">
+              <FiMapPin className="section-icon" />
+              Location Details
+            </h3>
             <div className="form-row">
               <Input
                 label="State"
@@ -259,7 +266,10 @@ const RegisterClientPage: React.FC = () => {
 
           {/* Contact Information Section */}
           <div className="form-section">
-            <h3 className="form-section-title">📞 Contact Information</h3>
+            <h3 className="form-section-title">
+              <FiPhone className="section-icon" />
+              Contact Information
+            </h3>
             <div className="form-row">
               <Input
                 label="Personal Phone"
@@ -286,7 +296,10 @@ const RegisterClientPage: React.FC = () => {
 
           {/* Project Information Section */}
           <div className="form-section">
-            <h3 className="form-section-title">🏗️ Project Details</h3>
+            <h3 className="form-section-title">
+              <FiTool className="section-icon" />
+              Project Details
+            </h3>
             <Input
               label="Project Number"
               type="text"

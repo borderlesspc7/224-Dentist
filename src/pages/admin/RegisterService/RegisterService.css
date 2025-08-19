@@ -22,10 +22,7 @@
   gap: 8px;
 }
 
-.billing-unit-info h4::before {
-  content: "💡";
-  font-size: 16px;
-}
+/* Removed emoji, using text only */
 
 .billing-options {
   display: grid;

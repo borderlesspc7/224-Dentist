@@ -3,6 +3,7 @@
 import type React from "react";
 
 import { useState } from "react";
+import { FiUser, FiShield } from "react-icons/fi";
 import Input from "../../../components/ui/Input/Input";
 import MultiSelect from "../../../components/ui/MultiSelect/MultiSelect";
 import Button from "../../../components/ui/Button/Button";
@@ -196,7 +197,10 @@ const RegisterUserPage: React.FC = () => {
         <form onSubmit={handleSubmit} className="modern-form">
           {/* User Information Section */}
           <div className="form-section">
-            <h3 className="form-section-title">👤 User Information</h3>
+            <h3 className="form-section-title">
+              <FiUser className="section-icon" />
+              User Information
+            </h3>
             <Input
               label="Email Address"
               type="email"
@@ -233,7 +237,10 @@ const RegisterUserPage: React.FC = () => {
 
           {/* Role and Permissions Section */}
           <div className="form-section">
-            <h3 className="form-section-title">🔐 Role & Permissions</h3>
+            <h3 className="form-section-title">
+              <FiShield className="section-icon" />
+              Role & Permissions
+            </h3>
             <div className="form-group">
               <label className="form-label">
                 User Role <span className="required">*</span>

@@ -93,10 +93,7 @@
   animation: slideDown 0.2s ease-out;
 }
 
-.input-error::before {
-  content: "⚠";
-  font-size: 14px;
-}
+/* Removed emoji warning icon */
 
 /* Placeholder styling */
 .input-field::placeholder {

@@ -35,8 +35,10 @@
 
 .select-arrow {
   color: #6b7280;
-  font-size: 12px;
+  width: 16px;
+  height: 16px;
   transition: transform 0.3s ease;
+  flex-shrink: 0;
 }
 
 .select-arrow.open {

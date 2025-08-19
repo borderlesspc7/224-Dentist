@@ -3,6 +3,7 @@
 import "./SelectInput.css";
 import React from "react";
 import { useState } from "react";
+import { FiChevronDown } from "react-icons/fi";
 
 interface Option {
   value: string;
@@ -60,7 +61,7 @@ const SelectInput: React.FC<SelectInputProps> = ({
           style={{ cursor: disabled ? "not-allowed" : "pointer" }}
         >
           <span className="select-value">{getDisplayText()}</span>
-          <span className={`select-arrow ${isOpen ? "open" : ""}`}>▼</span>
+          <FiChevronDown className={`select-arrow ${isOpen ? "open" : ""}`} />
         </div>
         {isOpen && (
           <div className="select-dropdown">

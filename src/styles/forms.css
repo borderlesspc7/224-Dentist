@@ -106,9 +106,12 @@
   gap: 8px;
 }
 
-.form-section-title::before {
-  content: "📋";
-  font-size: 16px;
+/* Removed emoji, now using React Icons */
+.section-icon {
+  width: 18px;
+  height: 18px;
+  color: #3b82f6;
+  flex-shrink: 0;
 }
 
 /* Mensagens de status */
@@ -142,6 +145,7 @@
   justify-content: center;
   font-size: 12px;
   font-weight: bold;
+  flex-shrink: 0;
 }
 
 .error-message {
@@ -162,6 +166,7 @@
   justify-content: center;
   font-size: 12px;
   font-weight: bold;
+  flex-shrink: 0;
 }
 
 /* Ações do formulário */

@@ -2,6 +2,7 @@
 
 import type React from "react";
 import { useState } from "react";
+import { FiCheck } from "react-icons/fi";
 import "./MultiSelect.css";
 
 interface Option {
@@ -82,7 +83,11 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
                 onClick={() => handleOptionClick(option.value)}
               >
                 <span className="option-checkbox">
-                  {value.includes(option.value) ? "✓" : ""}
+                  {value.includes(option.value) ? (
+                    <FiCheck className="check-icon" />
+                  ) : (
+                    ""
+                  )}
                 </span>
                 <span className="option-label">{option.label}</span>
               </div>

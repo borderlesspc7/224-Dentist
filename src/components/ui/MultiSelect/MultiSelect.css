@@ -98,6 +98,12 @@
   color: #0ea5e9;
 }
 
+.check-icon {
+  width: 12px;
+  height: 12px;
+  color: #0ea5e9;
+}
+
 .option-label {
   font-size: 14px;
   color: #0f172a;
