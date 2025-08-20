@@ -4,19 +4,8 @@ import { FiUser, FiMapPin, FiPhone, FiTool } from "react-icons/fi";
 import Input from "../../../components/ui/Input/Input";
 import Button from "../../../components/ui/Button/Button";
 import "../../../styles/forms.css";
-
-interface FormData {
-  name: string;
-  state: string;
-  city: string;
-  address: string;
-  personPhone: string;
-  officePhone: string;
-  projectNumber: string;
-  projectContractDate: string;
-  projectFinalDate: string;
-  projectDeadline: string;
-}
+import type { CreateClientData } from "../../../types/client";
+import { clientService } from "../../../services/clientService";
 
 interface FormErrors {
   name?: string;
@@ -33,7 +22,7 @@ interface FormErrors {
 }
 
 const RegisterClientPage: React.FC = () => {
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<CreateClientData>({
     name: "",
     state: "",
     city: "",
@@ -41,8 +30,8 @@ const RegisterClientPage: React.FC = () => {
     personPhone: "",
     officePhone: "",
     projectNumber: "",
-    projectContractDate: new Date().toISOString().split("T")[0],
-    projectFinalDate: new Date().toISOString().split("T")[0],
+    projectContractDate: "",
+    projectFinalDate: "",
     projectDeadline: "",
   });
 
@@ -50,7 +39,7 @@ const RegisterClientPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
 
-  const handleInputChange = (field: keyof FormData, value: string) => {
+  const handleInputChange = (field: keyof CreateClientData, value: string) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
@@ -135,7 +124,8 @@ const RegisterClientPage: React.FC = () => {
     try {
       console.log("Client data to save:", formData);
 
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const newClient = await clientService.createClient(formData);
+      console.log("New client:", newClient);
 
       setSuccessMessage("Client registered successfully!");
 
@@ -148,16 +138,15 @@ const RegisterClientPage: React.FC = () => {
         personPhone: "",
         officePhone: "",
         projectNumber: "",
-        projectContractDate: new Date().toISOString().split("T")[0],
-        projectFinalDate: new Date().toISOString().split("T")[0],
+        projectContractDate: "",
+        projectFinalDate: "",
         projectDeadline: "",
       });
       setErrors({});
 
-      // Limpar a mensagem de sucesso após 3 segundos
       setTimeout(() => {
         setSuccessMessage("");
-      }, 3000);
+      }, 6000);
     } catch (error) {
       setErrors({
         submit:

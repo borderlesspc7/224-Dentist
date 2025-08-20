@@ -7,12 +7,8 @@ import "./RegisterService.css";
 import SelectInput from "../../../components/ui/SelectInput/SelectInput";
 import Button from "../../../components/ui/Button/Button";
 import Input from "../../../components/ui/Input/Input";
-
-interface FormData {
-  serviceCode: string;
-  serviceName: string;
-  billingUnit: string;
-}
+import { serviceService } from "../../../services/serviceService";
+import type { CreateServiceData } from "../../../types/service";
 
 interface FormErrors {
   serviceCode?: string;
@@ -22,7 +18,7 @@ interface FormErrors {
 }
 
 const RegisterServicePage: React.FC = () => {
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<CreateServiceData>({
     serviceCode: "",
     serviceName: "",
     billingUnit: "",
@@ -33,12 +29,12 @@ const RegisterServicePage: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState("");
 
   const billingUnitOptions = [
-    { value: "ft", label: "Foot (ft)" },
-    { value: "box", label: "Box" },
-    { value: "fixed", label: "Fixed Price" },
+    { value: "ft" as const, label: "Foot (ft)" },
+    { value: "box" as const, label: "Box" },
+    { value: "fixed" as const, label: "Fixed Price" },
   ];
 
-  const handleInputChange = (field: keyof FormData, value: string) => {
+  const handleInputChange = (field: keyof CreateServiceData, value: string) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
@@ -90,9 +86,8 @@ const RegisterServicePage: React.FC = () => {
     setErrors({});
 
     try {
-      console.log("Service data to save:", formData);
-
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const newService = await serviceService.createService(formData);
+      console.log("Service created:", newService);
 
       setSuccessMessage("Service registered successfully!");
 
@@ -107,7 +102,7 @@ const RegisterServicePage: React.FC = () => {
       // Limpar a mensagem de sucesso após 3 segundos
       setTimeout(() => {
         setSuccessMessage("");
-      }, 3000);
+      }, 6000);
     } catch (error) {
       setErrors({
         submit:

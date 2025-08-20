@@ -3,6 +3,7 @@ import AdminLayout from "../pages/admin/AdminLayout";
 import RegisterUser from "../pages/admin/RegisterUser/RegisterUser";
 import RegisterService from "../pages/admin/RegisterService/RegisterService";
 import RegisterClient from "../pages/admin/RegisterClient/RegisterClient";
+import RegisterEmployee from "../pages/admin/RegisterEmployee/RegisterEmployee";
 
 export default function AdminRoutes() {
   return (
@@ -12,10 +13,7 @@ export default function AdminRoutes() {
         <Route path="cadastro-usuario" element={<RegisterUser />} />
         <Route path="cadastro-servico" element={<RegisterService />} />
         <Route path="cadastro-clientes" element={<RegisterClient />} />
-        <Route
-          path="cadastro-funcionario"
-          element={<div>Cadastro de Funcionário (em breve)</div>}
-        />
+        <Route path="cadastro-funcionario" element={<RegisterEmployee />} />
         <Route
           path="cadastro-subcontratados"
           element={<div>Cadastro de Subcontratados (em breve)</div>}
