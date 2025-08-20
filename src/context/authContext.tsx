@@ -51,7 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const register = async (credentials: LoginCredentials) => {
+  const register = async (credentials: RegisterCredentials) => {
     try {
       setError(null);
       setLoading(true);

@@ -13,6 +13,8 @@ interface InputProps {
   error?: string;
   disabled?: boolean;
   className?: string;
+  min?: string;
+  max?: string;
 }
 
 const Input: React.FC<InputProps> = ({
