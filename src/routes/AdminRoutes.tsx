@@ -4,6 +4,10 @@ import RegisterUser from "../pages/admin/RegisterUser/RegisterUser";
 import RegisterService from "../pages/admin/RegisterService/RegisterService";
 import RegisterClient from "../pages/admin/RegisterClient/RegisterClient";
 import RegisterEmployee from "../pages/admin/RegisterEmployee/RegisterEmployee";
+import RegisterSubcontractor from "../pages/admin/RegisterSubcontractor/RegisterSubcontractor";
+import RegisterContractService from "../pages/admin/RegisterContractService/RegisterContractService";
+import RegisterFinancing from "../pages/admin/RegisterFinancing/RegisterFinancing";
+import RegisterVehicle from "../pages/admin/RegisterVehicle/RegisterVehicle";
 
 export default function AdminRoutes() {
   return (
@@ -16,19 +20,19 @@ export default function AdminRoutes() {
         <Route path="cadastro-funcionario" element={<RegisterEmployee />} />
         <Route
           path="cadastro-subcontratados"
-          element={<div>Cadastro de Subcontratados (em breve)</div>}
+          element={<RegisterSubcontractor />}
         />
         <Route
           path="cadastro-servicos-contratados"
-          element={<div>Cadastro de Serviços Contratados (em breve)</div>}
+          element={<RegisterContractService />}
         />
         <Route
           path="cadastro-financiamentos"
-          element={<div>Cadastro de Financiamentos (em breve)</div>}
+          element={<RegisterFinancing />}
         />
         <Route
           path="cadastro-veiculos"
-          element={<div>Cadastro de Veículos (em breve)</div>}
+          element={<RegisterVehicle />}
         />
       </Route>
     </Routes>

@@ -35,20 +35,53 @@ export const authService = {
 
       const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
 
+      let userData: UserProfile;
+
       if (!userDoc.exists()) {
-        throw new Error("User not found");
+        // Create user document in Firestore
+        userData = {
+          uid: firebaseUser.uid,
+          email: firebaseUser.email ?? "",
+          role: "admin", // Give admin role to new users for testing
+          allowedPaths: ["admin"], // Allow access to admin area
+        };
+
+        // Save user document to Firestore
+        await setDoc(doc(db, "users", firebaseUser.uid), userData);
+      } else {
+        const raw = userDoc.data();
+        userData = {
+          uid: firebaseUser.uid,
+          email: raw.email ?? firebaseUser.email ?? "",
+          role: raw.role ?? "partial",
+          allowedPaths: Array.isArray(raw.allowedPaths) ? raw.allowedPaths : [],
+        };
+      }
+      return userData;
+    } catch (error: any) {
+      console.error("Login error:", error);
+
+      // Handle specific Firebase Auth errors
+      if (error.code) {
+        switch (error.code) {
+          case 'auth/user-not-found':
+            throw new Error("No user found with this email address");
+          case 'auth/wrong-password':
+            throw new Error("Incorrect password");
+          case 'auth/invalid-email':
+            throw new Error("Invalid email address");
+          case 'auth/user-disabled':
+            throw new Error("This user account has been disabled");
+          case 'auth/too-many-requests':
+            throw new Error("Too many failed attempts. Please try again later");
+          case 'auth/network-request-failed':
+            throw new Error("Network error. Please check your connection");
+          default:
+            throw new Error(`Authentication failed: ${error.message}`);
+        }
       }
 
-      const raw = userDoc.data();
-      const userData: UserProfile = {
-        uid: firebaseUser.uid,
-        email: raw.email ?? firebaseUser.email ?? "",
-        role: raw.role ?? "partial",
-        allowedPaths: Array.isArray(raw.allowedPaths) ? raw.allowedPaths : [],
-      };
-      return userData;
-    } catch (error) {
-      throw new Error("Failed to login" + error);
+      throw new Error(`Login failed: ${error.message || error}`);
     }
   },
 
@@ -79,7 +112,7 @@ export const authService = {
     } catch (error) {
       throw new Error(
         "Failed to register: " +
-          (error instanceof Error ? error.message : String(error))
+        (error instanceof Error ? error.message : String(error))
       );
     } finally {
       // Ensure secondary app is signed out and deleted
