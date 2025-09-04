@@ -36,6 +36,7 @@ const RegisterEmployeePage: React.FC = () => {
   const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  const [isDragOver, setIsDragOver] = useState(false);
 
   const handleInputChange = (
     field: keyof CreateEmployeeData,
@@ -76,6 +77,36 @@ const RegisterEmployeePage: React.FC = () => {
         driverLicenseDocument: "",
       }));
     }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+
+    const file = e.dataTransfer.files[0];
+    if (file && file.type === 'application/pdf') {
+      setFormData((prev) => ({
+        ...prev,
+        driverLicenseDocument: file,
+      }));
+    }
+  };
+
+  const removeFile = () => {
+    setFormData((prev) => ({
+      ...prev,
+      driverLicenseDocument: undefined,
+    }));
   };
 
   const validateForm = (): boolean => {
@@ -270,20 +301,67 @@ const RegisterEmployeePage: React.FC = () => {
 
             {/* File Upload for Driver License */}
             <div className="file-upload-container">
-              <label className="file-upload-label">
-                Driver License Document (PDF)
-                <input
-                  type="file"
-                  accept=".pdf"
-                  onChange={handleFileChange}
-                  className="file-upload-input"
-                  disabled={loading}
-                />
-              </label>
+              <div className="form-group">
+                <label className="form-label">
+                  Driver License Document (PDF) <span className="required">*</span>
+                </label>
+                <label
+                  className={`file-upload-label ${isDragOver ? 'dragover' : ''}`}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '24px 16px',
+                    border: '3px dashed #0ea5e9',
+                    borderRadius: '12px',
+                    background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    minHeight: '120px',
+                    width: '100%',
+                    boxSizing: 'border-box'
+                  }}
+                >
+                  <div style={{ fontSize: '32px', marginBottom: '8px', opacity: 0.8 }}>📄</div>
+                  <div style={{ fontSize: '16px', fontWeight: 600, color: isDragOver ? '#059669' : '#0ea5e9', textAlign: 'center' }}>
+                    {isDragOver ? 'Drop file here to upload' : 'Click to upload driver license document'}
+                  </div>
+                  <input
+                    type="file"
+                    accept=".pdf"
+                    onChange={handleFileChange}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '100%',
+                      opacity: 0,
+                      cursor: 'pointer',
+                      zIndex: 1
+                    }}
+                    disabled={loading}
+                  />
+                </label>
+              </div>
               {formData.driverLicenseDocument && (
-                <span className="file-upload-name">
-                  {formData.driverLicenseDocument.name}
-                </span>
+                <div className="file-upload-name">
+                  <span>{formData.driverLicenseDocument.name}</span>
+                  <button
+                    type="button"
+                    onClick={removeFile}
+                    className="file-remove-btn"
+                    disabled={loading}
+                  >
+                    ✕
+                  </button>
+                </div>
               )}
               {errors.driverLicenseDocument && (
                 <span className="error-message">

@@ -2,7 +2,8 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { FiUser, FiShield } from "react-icons/fi";
 import Input from "../../../components/ui/Input/Input";
 import MultiSelect from "../../../components/ui/MultiSelect/MultiSelect";
@@ -11,6 +12,7 @@ import { pathOptions } from "../navigationOptions";
 import "../../../styles/forms.css";
 import "./RegisterUser.css";
 import { authService } from "../../../services/authService";
+import { userService } from "../../../services/userService";
 import type { RegisterCredentials } from "../../../types/user";
 
 interface FormData {
@@ -30,6 +32,10 @@ interface FormErrors {
 }
 
 const RegisterUserPage: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const editId = searchParams.get("edit");
+  const isEditMode = Boolean(editId);
+
   // Form state
   const [formData, setFormData] = useState<FormData>({
     email: "",
@@ -48,6 +54,33 @@ const RegisterUserPage: React.FC = () => {
   // Validation errors
   const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
+  const [loadingUser, setLoadingUser] = useState(false);
+
+  // Load user data when in edit mode
+  useEffect(() => {
+    if (isEditMode && editId) {
+      setLoadingUser(true);
+      userService.getUserById(editId)
+        .then((user) => {
+          if (user) {
+            setFormData({
+              email: user.email || "",
+              password: "", // Don't load password
+              displayName: user.displayName || "",
+              role: user.role as "partial" | "admin" || "partial",
+              allowedPaths: user.allowedPaths || [],
+            });
+          }
+        })
+        .catch((error) => {
+          console.error("Error loading user:", error);
+          setErrors({ submit: "Erro ao carregar dados do usuário" });
+        })
+        .finally(() => {
+          setLoadingUser(false);
+        });
+    }
+  }, [isEditMode, editId]);
   const [successMessage, setSuccessMessage] = useState("");
   const isAdmin = formData.role === "admin";
 
@@ -94,9 +127,10 @@ const RegisterUserPage: React.FC = () => {
       newErrors.email = "Please enter a valid email";
     }
 
-    if (!formData.password) {
+    // Only validate password for new users
+    if (!isEditMode && !formData.password) {
       newErrors.password = "Password is required";
-    } else if (formData.password.length < 6) {
+    } else if (!isEditMode && formData.password && formData.password.length < 6) {
       newErrors.password = "Password must be at least 6 characters";
     }
 
@@ -124,25 +158,39 @@ const RegisterUserPage: React.FC = () => {
     setErrors({});
 
     try {
-      const newUser: RegisterCredentials = {
-        email: formData.email,
-        password: formData.password, // Agora password é obrigatório
-        displayName: formData.displayName,
-        role: formData.role,
-        allowedPaths: formData.allowedPaths,
-      };
+      if (isEditMode && editId) {
+        // Update existing user
+        await userService.updateUser(editId, {
+          email: formData.email,
+          displayName: formData.displayName,
+          role: formData.role,
+          allowedPaths: formData.allowedPaths,
+        });
+        setSuccessMessage("Usuário atualizado com sucesso!");
+      } else {
+        // Create new user
+        const newUser: RegisterCredentials = {
+          email: formData.email,
+          password: formData.password,
+          displayName: formData.displayName,
+          role: formData.role,
+          allowedPaths: formData.allowedPaths,
+        };
 
-      await authService.register(newUser);
-      setSuccessMessage("User created successfully!");
+        await authService.register(newUser);
+        setSuccessMessage("Usuário criado com sucesso!");
+      }
 
-      // Limpar o formulário mas manter a mensagem de sucesso
-      setFormData({
-        email: "",
-        password: "",
-        displayName: "",
-        role: "partial",
-        allowedPaths: [],
-      });
+      // Limpar o formulário apenas se não estiver editando
+      if (!isEditMode) {
+        setFormData({
+          email: "",
+          password: "",
+          displayName: "",
+          role: "partial",
+          allowedPaths: [],
+        });
+      }
       setErrors({});
 
       // Limpar a mensagem de sucesso após 3 segundos
@@ -176,14 +224,23 @@ const RegisterUserPage: React.FC = () => {
   return (
     <div className="form-page-content">
       <div className="content-header">
-        <h1 className="page-title">Create New User</h1>
+        <h1 className="page-title">
+          {isEditMode ? "Edit User" : "Create New User"}
+        </h1>
         <p className="page-subtitle">
-          Add a new user to the system with specific permissions and access
-          rights
+          {isEditMode
+            ? "Update user information and permissions"
+            : "Add a new user to the system with specific permissions and access rights"
+          }
         </p>
       </div>
 
-      <div className={`form-container ${loading ? "form-loading" : ""}`}>
+      <div className={`form-container ${loading || loadingUser ? "form-loading" : ""}`}>
+        {/* Loading Message */}
+        {loadingUser && (
+          <div className="status-message info-message">Carregando dados do usuário...</div>
+        )}
+
         {/* Success Message */}
         {successMessage && (
           <div className="status-message success-message">{successMessage}</div>
@@ -223,13 +280,13 @@ const RegisterUserPage: React.FC = () => {
                 disabled={loading}
               />
               <Input
-                label="Password"
+                label={isEditMode ? "New Password (optional)" : "Password"}
                 type="password"
                 value={formData.password}
                 onChange={(e) => handleInputChange("password", e)}
-                placeholder="Enter secure password"
+                placeholder={isEditMode ? "Leave empty to keep current password" : "Enter secure password"}
                 error={errors.password}
-                required
+                required={!isEditMode}
                 disabled={loading}
               />
             </div>
@@ -282,8 +339,11 @@ const RegisterUserPage: React.FC = () => {
 
           {/* Form Actions */}
           <div className="form-actions">
-            <Button type="submit" variant="primary" disabled={loading}>
-              {loading ? "Creating User..." : "Save User"}
+            <Button type="submit" variant="primary" disabled={loading || loadingUser}>
+              {loading
+                ? (isEditMode ? "Updating User..." : "Creating User...")
+                : (isEditMode ? "Update User" : "Create User")
+              }
             </Button>
             <Button
               type="button"

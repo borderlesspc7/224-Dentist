@@ -1,5 +1,6 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { FiUser, FiMapPin, FiPhone, FiTool } from "react-icons/fi";
 import Input from "../../../components/ui/Input/Input";
 import Button from "../../../components/ui/Button/Button";
@@ -22,6 +23,10 @@ interface FormErrors {
 }
 
 const RegisterClientPage: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const editId = searchParams.get("edit");
+  const isEditMode = Boolean(editId);
+
   const [formData, setFormData] = useState<CreateClientData>({
     name: "",
     state: "",
@@ -37,7 +42,39 @@ const RegisterClientPage: React.FC = () => {
 
   const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
+  const [loadingClient, setLoadingClient] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+
+  // Load client data when in edit mode
+  useEffect(() => {
+    if (isEditMode && editId) {
+      setLoadingClient(true);
+      clientService.getClientById(editId)
+        .then((client) => {
+          if (client) {
+            setFormData({
+              name: client.name || "",
+              state: client.state || "",
+              city: client.city || "",
+              address: client.address || "",
+              personPhone: client.personPhone || "",
+              officePhone: client.officePhone || "",
+              projectNumber: client.projectNumber || "",
+              projectContractDate: client.projectContractDate || "",
+              projectFinalDate: client.projectFinalDate || "",
+              projectDeadline: client.projectDeadline || "",
+            });
+          }
+        })
+        .catch((error) => {
+          console.error("Error loading client:", error);
+          setErrors({ submit: "Erro ao carregar dados do cliente" });
+        })
+        .finally(() => {
+          setLoadingClient(false);
+        });
+    }
+  }, [isEditMode, editId]);
 
   const handleInputChange = (field: keyof CreateClientData, value: string) => {
     setFormData((prev) => ({
@@ -124,24 +161,32 @@ const RegisterClientPage: React.FC = () => {
     try {
       console.log("Client data to save:", formData);
 
-      const newClient = await clientService.createClient(formData);
-      console.log("New client:", newClient);
+      if (isEditMode && editId) {
+        // Update existing client
+        await clientService.updateClient(editId, formData);
+        setSuccessMessage("Cliente atualizado com sucesso!");
+      } else {
+        // Create new client
+        const newClient = await clientService.createClient(formData);
+        console.log("New client:", newClient);
+        setSuccessMessage("Cliente registrado com sucesso!");
+      }
 
-      setSuccessMessage("Client registered successfully!");
-
-      // Limpar o formulário mas manter a mensagem de sucesso
-      setFormData({
-        name: "",
-        state: "",
-        city: "",
-        address: "",
-        personPhone: "",
-        officePhone: "",
-        projectNumber: "",
-        projectContractDate: "",
-        projectFinalDate: "",
-        projectDeadline: "",
-      });
+      // Limpar o formulário apenas se não estiver editando
+      if (!isEditMode) {
+        setFormData({
+          name: "",
+          state: "",
+          city: "",
+          address: "",
+          personPhone: "",
+          officePhone: "",
+          projectNumber: "",
+          projectContractDate: "",
+          projectFinalDate: "",
+          projectDeadline: "",
+        });
+      }
       setErrors({});
 
       setTimeout(() => {
@@ -178,14 +223,23 @@ const RegisterClientPage: React.FC = () => {
   return (
     <div className="form-page-content">
       <div className="content-header">
-        <h1 className="page-title">Register Client</h1>
+        <h1 className="page-title">
+          {isEditMode ? "Edit Client" : "Register Client"}
+        </h1>
         <p className="page-subtitle">
-          Create a new client profile with project details and contact
-          information
+          {isEditMode
+            ? "Update client information and project details"
+            : "Create a new client profile with project details and contact information"
+          }
         </p>
       </div>
 
-      <div className={`form-container ${loading ? "form-loading" : ""}`}>
+      <div className={`form-container ${loading || loadingClient ? "form-loading" : ""}`}>
+        {/* Loading Message */}
+        {loadingClient && (
+          <div className="status-message info-message">Carregando dados do cliente...</div>
+        )}
+
         {successMessage && (
           <div className="status-message success-message">{successMessage}</div>
         )}
@@ -335,8 +389,11 @@ const RegisterClientPage: React.FC = () => {
           </div>
 
           <div className="form-actions">
-            <Button type="submit" variant="primary" disabled={loading}>
-              {loading ? "Saving Client..." : "Save Client"}
+            <Button type="submit" variant="primary" disabled={loading || loadingClient}>
+              {loading
+                ? (isEditMode ? "Updating Client..." : "Saving Client...")
+                : (isEditMode ? "Update Client" : "Save Client")
+              }
             </Button>
             <Button
               type="button"

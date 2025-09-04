@@ -4,6 +4,11 @@ import {
   UsersIcon,
   CreditCardIcon,
   CarIcon,
+  LayoutDashboardIcon,
+  HomeIcon,
+  WalletIcon,
+  FileTextIcon,
+  DollarSignIcon,
 } from "lucide-react";
 
 interface PathOption {
@@ -13,6 +18,11 @@ interface PathOption {
 }
 
 export const pathOptions: PathOption[] = [
+  {
+    value: "dashboard",
+    label: "Dashboard",
+    icon: <LayoutDashboardIcon />,
+  },
   {
     value: "cadastro-usuario",
     label: "Register User",
@@ -52,5 +62,25 @@ export const pathOptions: PathOption[] = [
     value: "cadastro-veiculos",
     label: "Register Vehicles",
     icon: <CarIcon />,
+  },
+  {
+    value: "cadastro-conta-bancaria",
+    label: "Register Bank Account",
+    icon: <HomeIcon />,
+  },
+  {
+    value: "cadastro-cartao-credito",
+    label: "Register Credit Card",
+    icon: <WalletIcon />,
+  },
+  {
+    value: "cadastro-tipo-despesa",
+    label: "Register Expense Type",
+    icon: <FileTextIcon />,
+  },
+  {
+    value: "cadastro-preco-servico",
+    label: "Register Service Pricing",
+    icon: <DollarSignIcon />,
   },
 ];

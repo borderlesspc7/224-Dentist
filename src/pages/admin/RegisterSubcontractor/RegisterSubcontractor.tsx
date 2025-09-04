@@ -16,9 +16,11 @@ interface FormErrors {
     state?: string;
     city?: string;
     address?: string;
+    itinNumber?: string;
     services?: string;
     licenseNumber?: string;
     insuranceExpiry?: string;
+    paymentTerms?: string;
     hourlyRate?: string;
     submit?: string;
 }
@@ -32,11 +34,14 @@ const RegisterSubcontractorPage: React.FC = () => {
         state: "",
         city: "",
         address: "",
+        itinNumber: "",
         services: [],
         licenseNumber: "",
         insuranceExpiry: "",
+        insuranceDocuments: [],
         certifications: [],
         hourlyRate: undefined,
+        paymentTerms: "30",
         availability: "available",
         notes: "",
     });
@@ -44,6 +49,7 @@ const RegisterSubcontractorPage: React.FC = () => {
     const [errors, setErrors] = useState<FormErrors>({});
     const [loading, setLoading] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
+    const [isDragOver, setIsDragOver] = useState(false);
 
     // Service options for MultiSelect
     const serviceOptions = [
@@ -92,6 +98,49 @@ const RegisterSubcontractorPage: React.FC = () => {
         }
     };
 
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = Array.from(e.target.files || []);
+        if (files.length > 0) {
+            setFormData((prev) => ({
+                ...prev,
+                insuranceDocuments: [...(prev.insuranceDocuments || []), ...files],
+            }));
+        }
+    };
+
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragOver(true);
+    };
+
+    const handleDragLeave = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragOver(false);
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragOver(false);
+
+        const files = Array.from(e.dataTransfer.files).filter(file =>
+            file.type === 'application/pdf'
+        );
+
+        if (files.length > 0) {
+            setFormData((prev) => ({
+                ...prev,
+                insuranceDocuments: [...(prev.insuranceDocuments || []), ...files],
+            }));
+        }
+    };
+
+    const removeFile = (index: number) => {
+        setFormData((prev) => ({
+            ...prev,
+            insuranceDocuments: prev.insuranceDocuments?.filter((_, i) => i !== index) || [],
+        }));
+    };
+
     const validateForm = (): boolean => {
         const newErrors: FormErrors = {};
 
@@ -125,8 +174,16 @@ const RegisterSubcontractorPage: React.FC = () => {
             newErrors.address = "Address is required";
         }
 
+        if (!formData.itinNumber.trim()) {
+            newErrors.itinNumber = "ITIN Number is required";
+        }
+
         if (formData.services.length === 0) {
             newErrors.services = "Please select at least one service";
+        }
+
+        if (!formData.paymentTerms) {
+            newErrors.paymentTerms = "Payment terms are required";
         }
 
         if (formData.hourlyRate !== undefined && formData.hourlyRate < 0) {
@@ -165,11 +222,14 @@ const RegisterSubcontractorPage: React.FC = () => {
                 state: "",
                 city: "",
                 address: "",
+                itinNumber: "",
                 services: [],
                 licenseNumber: "",
                 insuranceExpiry: "",
+                insuranceDocuments: [],
                 certifications: [],
                 hourlyRate: undefined,
+                paymentTerms: "30",
                 availability: "available",
                 notes: "",
             });
@@ -198,11 +258,14 @@ const RegisterSubcontractorPage: React.FC = () => {
             state: "",
             city: "",
             address: "",
+            itinNumber: "",
             services: [],
             licenseNumber: "",
             insuranceExpiry: "",
+            insuranceDocuments: [],
             certifications: [],
             hourlyRate: undefined,
+            paymentTerms: "30",
             availability: "available",
             notes: "",
         });
@@ -325,6 +388,16 @@ const RegisterSubcontractorPage: React.FC = () => {
                             required
                             disabled={loading}
                         />
+                        <Input
+                            label="ITIN Number"
+                            type="text"
+                            value={formData.itinNumber}
+                            onChange={(value) => handleInputChange("itinNumber", value)}
+                            placeholder="XXX-XX-XXXX"
+                            error={errors.itinNumber}
+                            required
+                            disabled={loading}
+                        />
                     </div>
 
                     {/* Services Section */}
@@ -378,6 +451,77 @@ const RegisterSubcontractorPage: React.FC = () => {
                                 disabled={loading}
                             />
                         </div>
+
+                        {/* Insurance Documents Upload */}
+                        <div className="file-upload-container">
+                            <div className="form-group">
+                                <label className="form-label">
+                                    Insurance Documents (PDF) <span className="required">*</span>
+                                </label>
+                                <label
+                                    className={`file-upload-label ${isDragOver ? 'dragover' : ''}`}
+                                    onDragOver={handleDragOver}
+                                    onDragLeave={handleDragLeave}
+                                    onDrop={handleDrop}
+                                    style={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        padding: '24px 16px',
+                                        border: '3px dashed #0ea5e9',
+                                        borderRadius: '12px',
+                                        background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.3s ease',
+                                        position: 'relative',
+                                        overflow: 'hidden',
+                                        minHeight: '120px',
+                                        width: '100%',
+                                        boxSizing: 'border-box'
+                                    }}
+                                >
+                                    <div style={{ fontSize: '32px', marginBottom: '8px', opacity: 0.8 }}>📄</div>
+                                    <div style={{ fontSize: '16px', fontWeight: 600, color: isDragOver ? '#059669' : '#0ea5e9', textAlign: 'center' }}>
+                                        {isDragOver ? 'Drop files here to upload' : 'Click to upload insurance documents'}
+                                    </div>
+                                    <input
+                                        type="file"
+                                        accept=".pdf"
+                                        multiple
+                                        onChange={handleFileChange}
+                                        style={{
+                                            position: 'absolute',
+                                            top: 0,
+                                            left: 0,
+                                            width: '100%',
+                                            height: '100%',
+                                            opacity: 0,
+                                            cursor: 'pointer',
+                                            zIndex: 1
+                                        }}
+                                        disabled={loading}
+                                    />
+                                </label>
+                            </div>
+                            {formData.insuranceDocuments && formData.insuranceDocuments.length > 0 && (
+                                <div className="file-upload-list">
+                                    {formData.insuranceDocuments.map((file, index) => (
+                                        <div key={index} className="file-upload-name">
+                                            <span>{file.name}</span>
+                                            <button
+                                                type="button"
+                                                onClick={() => removeFile(index)}
+                                                className="file-remove-btn"
+                                                disabled={loading}
+                                            >
+                                                ✕
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                         <div className="form-row">
                             <Input
                                 label="Hourly Rate"
@@ -388,6 +532,26 @@ const RegisterSubcontractorPage: React.FC = () => {
                                 error={errors.hourlyRate}
                                 disabled={loading}
                             />
+                            <div className="form-group">
+                                <label className="form-label">
+                                    Payment Terms <span className="required">*</span>
+                                </label>
+                                <select
+                                    value={formData.paymentTerms}
+                                    onChange={(e) => handleInputChange("paymentTerms", e.target.value as "7" | "15" | "30")}
+                                    className="role-select"
+                                    disabled={loading}
+                                >
+                                    <option value="7">7 days after execution</option>
+                                    <option value="15">15 days after execution</option>
+                                    <option value="30">30 days after execution</option>
+                                </select>
+                                {errors.paymentTerms && (
+                                    <span className="error-message">{errors.paymentTerms}</span>
+                                )}
+                            </div>
+                        </div>
+                        <div className="form-row">
                             <div className="form-group">
                                 <label className="form-label">
                                     Availability <span className="required">*</span>

@@ -14,11 +14,15 @@ interface FormErrors {
     year?: string;
     vin?: string;
     licensePlate?: string;
+    licensePlateRenewalDate?: string;
     color?: string;
     fuelType?: string;
     engineSize?: string;
     transmission?: string;
     mileage?: string;
+    financingStatus?: string;
+    dotNumber?: string;
+    dotRenewalDate?: string;
     purchaseDate?: string;
     purchasePrice?: string;
     currentValue?: string;
@@ -40,11 +44,16 @@ const RegisterVehiclePage: React.FC = () => {
         year: new Date().getFullYear(),
         vin: "",
         licensePlate: "",
+        licensePlateRenewalDate: "",
         color: "",
         fuelType: "diesel",
         engineSize: "",
         transmission: "manual",
         mileage: 0,
+        monthlyMileageHistory: [],
+        financingStatus: "not_financed",
+        dotNumber: "",
+        dotRenewalDate: "",
         purchaseDate: "",
         purchasePrice: 0,
         currentValue: 0,
@@ -106,6 +115,10 @@ const RegisterVehiclePage: React.FC = () => {
             newErrors.licensePlate = "License plate is required";
         }
 
+        if (!formData.licensePlateRenewalDate) {
+            newErrors.licensePlateRenewalDate = "License plate renewal date is required";
+        }
+
         if (!formData.color.trim()) {
             newErrors.color = "Color is required";
         }
@@ -150,6 +163,14 @@ const RegisterVehiclePage: React.FC = () => {
             newErrors.location = "Location is required";
         }
 
+        if (!formData.dotNumber.trim()) {
+            newErrors.dotNumber = "DOT Number is required";
+        }
+
+        if (!formData.dotRenewalDate) {
+            newErrors.dotRenewalDate = "DOT renewal date is required";
+        }
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -177,11 +198,16 @@ const RegisterVehiclePage: React.FC = () => {
                 year: new Date().getFullYear(),
                 vin: "",
                 licensePlate: "",
+                licensePlateRenewalDate: "",
                 color: "",
                 fuelType: "diesel",
                 engineSize: "",
                 transmission: "manual",
                 mileage: 0,
+                monthlyMileageHistory: [],
+                financingStatus: "not_financed",
+                dotNumber: "",
+                dotRenewalDate: "",
                 purchaseDate: "",
                 purchasePrice: 0,
                 currentValue: 0,
@@ -221,11 +247,16 @@ const RegisterVehiclePage: React.FC = () => {
             year: new Date().getFullYear(),
             vin: "",
             licensePlate: "",
+            licensePlateRenewalDate: "",
             color: "",
             fuelType: "diesel",
             engineSize: "",
             transmission: "manual",
             mileage: 0,
+            monthlyMileageHistory: [],
+            financingStatus: "not_financed",
+            dotNumber: "",
+            dotRenewalDate: "",
             purchaseDate: "",
             purchasePrice: 0,
             currentValue: 0,
@@ -354,6 +385,55 @@ const RegisterVehiclePage: React.FC = () => {
                                 onChange={(value) => handleInputChange("licensePlate", value)}
                                 placeholder="Enter license plate"
                                 error={errors.licensePlate}
+                                required
+                                disabled={loading}
+                            />
+                        </div>
+                        <div className="form-row">
+                            <Input
+                                label="License Plate Renewal Date"
+                                type="date"
+                                value={formData.licensePlateRenewalDate}
+                                onChange={(value) => handleInputChange("licensePlateRenewalDate", value)}
+                                error={errors.licensePlateRenewalDate}
+                                required
+                                disabled={loading}
+                            />
+                            <div className="form-group">
+                                <label className="form-label">
+                                    Financing Status <span className="required">*</span>
+                                </label>
+                                <select
+                                    value={formData.financingStatus}
+                                    onChange={(e) => handleInputChange("financingStatus", e.target.value as "financed" | "not_financed")}
+                                    className="role-select"
+                                    disabled={loading}
+                                >
+                                    <option value="not_financed">Not Financed</option>
+                                    <option value="financed">Financed</option>
+                                </select>
+                                {errors.financingStatus && (
+                                    <span className="error-message">{errors.financingStatus}</span>
+                                )}
+                            </div>
+                        </div>
+                        <div className="form-row">
+                            <Input
+                                label="DOT Number"
+                                type="text"
+                                value={formData.dotNumber}
+                                onChange={(value) => handleInputChange("dotNumber", value)}
+                                placeholder="Enter DOT number"
+                                error={errors.dotNumber}
+                                required
+                                disabled={loading}
+                            />
+                            <Input
+                                label="DOT Renewal Date"
+                                type="date"
+                                value={formData.dotRenewalDate}
+                                onChange={(value) => handleInputChange("dotRenewalDate", value)}
+                                error={errors.dotRenewalDate}
                                 required
                                 disabled={loading}
                             />
