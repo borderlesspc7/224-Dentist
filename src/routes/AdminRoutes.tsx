@@ -1,6 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import AdminLayout from "../pages/admin/AdminLayout";
 import Dashboard from "../pages/admin/Dashboard/Dashboard";
+import Cadastros from "../pages/admin/Cadastros/Cadastros";
 import RegisterUser from "../pages/admin/RegisterUser/RegisterUser";
 import RegisterService from "../pages/admin/RegisterService/RegisterService";
 import RegisterClient from "../pages/admin/RegisterClient/RegisterClient";
@@ -20,6 +21,7 @@ export default function AdminRoutes() {
       <Route path="/" element={<AdminLayout />}>
         <Route index element={<Dashboard />} />
         <Route path="dashboard" element={<Dashboard />} />
+        <Route path="cadastros" element={<Cadastros />} />
         <Route path="cadastro-usuario" element={<RegisterUser />} />
         <Route path="cadastro-servico" element={<RegisterService />} />
         <Route path="cadastro-clientes" element={<RegisterClient />} />
@@ -32,14 +34,8 @@ export default function AdminRoutes() {
           path="cadastro-servicos-contratados"
           element={<RegisterContractService />}
         />
-        <Route
-          path="cadastro-financiamentos"
-          element={<RegisterFinancing />}
-        />
-        <Route
-          path="cadastro-veiculos"
-          element={<RegisterVehicle />}
-        />
+        <Route path="cadastro-financiamentos" element={<RegisterFinancing />} />
+        <Route path="cadastro-veiculos" element={<RegisterVehicle />} />
         <Route
           path="cadastro-conta-bancaria"
           element={<RegisterBankAccount />}
@@ -48,10 +44,7 @@ export default function AdminRoutes() {
           path="cadastro-cartao-credito"
           element={<RegisterCreditCard />}
         />
-        <Route
-          path="cadastro-tipo-despesa"
-          element={<RegisterExpenseType />}
-        />
+        <Route path="cadastro-tipo-despesa" element={<RegisterExpenseType />} />
         <Route
           path="cadastro-preco-servico"
           element={<RegisterServicePricing />}

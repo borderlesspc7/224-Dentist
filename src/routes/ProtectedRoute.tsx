@@ -22,5 +22,6 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const isAllowed = hasAccess(user, required);
 
   if (!isAllowed) return <Navigate to="/" replace />;
+
   return children;
 };

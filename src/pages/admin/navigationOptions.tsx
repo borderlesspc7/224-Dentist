@@ -1,14 +1,9 @@
 import {
-  ServerIcon,
-  UserPlusIcon,
-  UsersIcon,
-  CreditCardIcon,
-  CarIcon,
   LayoutDashboardIcon,
-  HomeIcon,
-  WalletIcon,
+  UserPlusIcon,
+  BarChart3Icon,
+  SettingsIcon,
   FileTextIcon,
-  DollarSignIcon,
 } from "lucide-react";
 
 interface PathOption {
@@ -24,63 +19,23 @@ export const pathOptions: PathOption[] = [
     icon: <LayoutDashboardIcon />,
   },
   {
-    value: "cadastro-usuario",
-    label: "Register User",
+    value: "cadastros",
+    label: "Cadastros",
     icon: <UserPlusIcon />,
   },
   {
-    value: "cadastro-servico",
-    label: "Register Service",
-    icon: <ServerIcon />,
+    value: "relatorios",
+    label: "Relatórios",
+    icon: <BarChart3Icon />,
   },
   {
-    value: "cadastro-clientes",
-    label: "Register Clients",
-    icon: <UsersIcon />,
-  },
-  {
-    value: "cadastro-funcionario",
-    label: "Register Employee",
-    icon: <UserPlusIcon />,
-  },
-  {
-    value: "cadastro-subcontratados",
-    label: "Register Subcontractors",
-    icon: <UserPlusIcon />,
-  },
-  {
-    value: "cadastro-servicos-contratados",
-    label: "Register Contract Services",
-    icon: <ServerIcon />,
-  },
-  {
-    value: "cadastro-financiamentos",
-    label: "Register Financings",
-    icon: <CreditCardIcon />,
-  },
-  {
-    value: "cadastro-veiculos",
-    label: "Register Vehicles",
-    icon: <CarIcon />,
-  },
-  {
-    value: "cadastro-conta-bancaria",
-    label: "Register Bank Account",
-    icon: <HomeIcon />,
-  },
-  {
-    value: "cadastro-cartao-credito",
-    label: "Register Credit Card",
-    icon: <WalletIcon />,
-  },
-  {
-    value: "cadastro-tipo-despesa",
-    label: "Register Expense Type",
+    value: "documentos",
+    label: "Documentos",
     icon: <FileTextIcon />,
   },
   {
-    value: "cadastro-preco-servico",
-    label: "Register Service Pricing",
-    icon: <DollarSignIcon />,
+    value: "configuracoes",
+    label: "Configurações",
+    icon: <SettingsIcon />,
   },
 ];
