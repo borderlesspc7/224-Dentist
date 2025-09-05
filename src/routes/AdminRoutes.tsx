@@ -2,6 +2,8 @@ import { Routes, Route } from "react-router-dom";
 import AdminLayout from "../pages/admin/AdminLayout";
 import Dashboard from "../pages/admin/Dashboard/Dashboard";
 import Cadastros from "../pages/admin/Cadastros/Cadastros";
+import Avisos from "../pages/admin/Avisos/Avisos";
+import VehicleAlert from "../pages/admin/Avisos/VehicleAlert/VehicleAlert";
 import RegisterUser from "../pages/admin/RegisterUser/RegisterUser";
 import RegisterService from "../pages/admin/RegisterService/RegisterService";
 import RegisterClient from "../pages/admin/RegisterClient/RegisterClient";
@@ -22,6 +24,8 @@ export default function AdminRoutes() {
         <Route index element={<Dashboard />} />
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="cadastros" element={<Cadastros />} />
+        <Route path="avisos" element={<Avisos />} />
+        <Route path="manutencao-veiculos" element={<VehicleAlert />} />
         <Route path="cadastro-usuario" element={<RegisterUser />} />
         <Route path="cadastro-servico" element={<RegisterService />} />
         <Route path="cadastro-clientes" element={<RegisterClient />} />

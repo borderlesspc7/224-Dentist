@@ -4,6 +4,7 @@ import {
   BarChart3Icon,
   SettingsIcon,
   FileTextIcon,
+  BellIcon,
 } from "lucide-react";
 
 interface PathOption {
@@ -20,22 +21,27 @@ export const pathOptions: PathOption[] = [
   },
   {
     value: "cadastros",
-    label: "Cadastros",
+    label: "Registration",
     icon: <UserPlusIcon />,
   },
   {
+    value: "avisos",
+    label: "Alerts",
+    icon: <BellIcon />,
+  },
+  {
     value: "relatorios",
-    label: "Relatórios",
+    label: "Reports",
     icon: <BarChart3Icon />,
   },
   {
     value: "documentos",
-    label: "Documentos",
+    label: "Documents",
     icon: <FileTextIcon />,
   },
   {
     value: "configuracoes",
-    label: "Configurações",
+    label: "Settings",
     icon: <SettingsIcon />,
   },
 ];
