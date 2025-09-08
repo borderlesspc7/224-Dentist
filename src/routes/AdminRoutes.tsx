@@ -16,7 +16,7 @@ import RegisterBankAccount from "../pages/admin/RegisterBankAccount/RegisterBank
 import RegisterCreditCard from "../pages/admin/RegisterCreditCard/RegisterCreditCard";
 import RegisterExpenseType from "../pages/admin/RegisterExpenseType/RegisterExpenseType";
 import RegisterServicePricing from "../pages/admin/RegisterServicePricing/RegisterServicePricing";
-
+import ProjectAlert from "../pages/admin/Avisos/ProjectAlert/ProjectAlert";
 export default function AdminRoutes() {
   return (
     <Routes>
@@ -26,6 +26,7 @@ export default function AdminRoutes() {
         <Route path="cadastros" element={<Cadastros />} />
         <Route path="avisos" element={<Avisos />} />
         <Route path="manutencao-veiculos" element={<VehicleAlert />} />
+        <Route path="termino-projeto" element={<ProjectAlert />} />
         <Route path="cadastro-usuario" element={<RegisterUser />} />
         <Route path="cadastro-servico" element={<RegisterService />} />
         <Route path="cadastro-clientes" element={<RegisterClient />} />
