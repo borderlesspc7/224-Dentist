@@ -5,7 +5,7 @@ import "./Input.css";
 
 interface InputProps {
   label?: string;
-  type?: "text" | "password" | "email" | "date";
+  type?: "text" | "password" | "email" | "date" | "number";
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
