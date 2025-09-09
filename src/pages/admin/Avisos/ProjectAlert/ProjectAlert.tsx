@@ -37,6 +37,10 @@ const ProjectAlert: React.FC = () => {
   const [filterPriority, setFilterPriority] = useState<
     "all" | "low" | "medium" | "high"
   >("all");
+  const [selectedAlert, setSelectedAlert] = useState<ProjectAlert | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingProgress, setEditingProgress] = useState(false);
+  const [newProgress, setNewProgress] = useState(0);
 
   useEffect(() => {
     const mockAlerts: ProjectAlert[] = [
@@ -168,11 +172,62 @@ const ProjectAlert: React.FC = () => {
 
   // Funções de ação
   const handleViewDetails = (alertId: string) => {
-    console.log("View details for project:", alertId);
+    const alert = alerts.find((alert) => alert.id === alertId);
+    if (alert) {
+      setSelectedAlert(alert);
+      setIsModalOpen(true);
+    }
   };
 
   const handleUpdateProgress = (alertId: string) => {
-    console.log("Update progress for project:", alertId);
+    const alert = alerts.find((alert) => alert.id === alertId);
+    if (alert) {
+      setSelectedAlert(alert);
+      setEditingProgress(true);
+      setNewProgress(alert.actualProgress);
+      setIsModalOpen(true);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setSelectedAlert(null);
+    setEditingProgress(false);
+    setIsModalOpen(false);
+  };
+
+  const handleSaveProgress = () => {
+    if (selectedAlert) {
+      setAlerts((prev) =>
+        prev.map((alert) =>
+          alert.id === selectedAlert.id
+            ? {
+                ...alert,
+                actualProgress: newProgress,
+                lastUpdate: new Date().toISOString().split("T")[0],
+              }
+            : alert
+        )
+      );
+      setEditingProgress(false);
+    }
+  };
+
+  const handleMarkAsCompleted = () => {
+    if (selectedAlert) {
+      setAlerts((prev) =>
+        prev.map((alert) =>
+          alert.id === selectedAlert.id
+            ? {
+                ...alert,
+                status: "completed" as const,
+                actualProgress: 100,
+                lastUpdate: new Date().toISOString().split("T")[0],
+              }
+            : alert
+        )
+      );
+      handleCloseModal();
+    }
   };
 
   return (
@@ -341,6 +396,161 @@ const ProjectAlert: React.FC = () => {
           })
         )}
       </div>
+
+      {isModalOpen && selectedAlert && (
+        <div className="modal-overlay" onClick={handleCloseModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Project Details</h2>
+              <button className="close-button" onClick={handleCloseModal}>
+                X
+              </button>
+            </div>
+
+            <div className="modal-body">
+              <div className="project-info-section">
+                <h3>{selectedAlert.projectName}</h3>
+                <p className="client-info">
+                  Client: {selectedAlert.clientName}
+                </p>
+                <div className="status-priority-row">
+                  <div
+                    className="status-badge"
+                    style={{
+                      backgroundColor: getStatusColor(selectedAlert.status),
+                    }}
+                  >
+                    {getStatusIcon(selectedAlert.status)}
+                    <span>
+                      {selectedAlert.status.replace("-", " ").toUpperCase()}
+                    </span>
+                  </div>
+                  <div
+                    className="priority-badge"
+                    style={{
+                      backgroundColor: getPriorityColor(selectedAlert.priority),
+                    }}
+                  >
+                    {selectedAlert.priority.toUpperCase()}
+                  </div>
+                </div>
+              </div>
+
+              <div className="project-details-grid">
+                <div className="detail-item">
+                  <label>Project Type:</label>
+                  <span>{selectedAlert.projectType}</span>
+                </div>
+                <div className="detail-item">
+                  <label>Responsible Person:</label>
+                  <span>{selectedAlert.responsiblePerson}</span>
+                </div>
+                <div className="detail-item">
+                  <label>Start Date:</label>
+                  <span>{selectedAlert.startDate}</span>
+                </div>
+                <div className="detail-item">
+                  <label>Planned End Date:</label>
+                  <span>{selectedAlert.plannedEndDate}</span>
+                </div>
+                <div className="detail-item">
+                  <label>Last Update:</label>
+                  <span>{selectedAlert.lastUpdate}</span>
+                </div>
+                <div className="detail-item">
+                  <label>Days Remaining:</label>
+                  <span
+                    className={
+                      calculateDaysRemaining(selectedAlert.plannedEndDate) < 0
+                        ? "overdue"
+                        : calculateDaysRemaining(
+                            selectedAlert.plannedEndDate
+                          ) <= 7
+                        ? "urgent"
+                        : "normal"
+                    }
+                  >
+                    {calculateDaysRemaining(selectedAlert.plannedEndDate) < 0
+                      ? `Overdue by ${Math.abs(
+                          calculateDaysRemaining(selectedAlert.plannedEndDate)
+                        )} days`
+                      : `${calculateDaysRemaining(
+                          selectedAlert.plannedEndDate
+                        )} days remaining`}
+                  </span>
+                </div>
+              </div>
+
+              <div className="progress-section">
+                <div className="progress-header">
+                  <label>Progress:</label>
+                  {!editingProgress ? (
+                    <button
+                      className="edit-button"
+                      onClick={() => setEditingProgress(true)}
+                    >
+                      Edit
+                    </button>
+                  ) : (
+                    <div className="progress-edit">
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={newProgress}
+                        onChange={(e) => setNewProgress(Number(e.target.value))}
+                        className="progress-input"
+                      />
+                      <button
+                        className="save-button"
+                        onClick={handleSaveProgress}
+                      >
+                        Save
+                      </button>
+                      <button
+                        className="cancel-button"
+                        onClick={() => setEditingProgress(false)}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  )}
+                </div>
+                <div className="progress-bar">
+                  <div
+                    className="progress-fill"
+                    style={{ width: `${selectedAlert.actualProgress}%` }}
+                  ></div>
+                </div>
+                <span className="progress-text">
+                  {selectedAlert.actualProgress}%
+                </span>
+              </div>
+              <div className="description-section">
+                <label>Description:</label>
+                <p>{selectedAlert.description}</p>
+              </div>
+            </div>
+
+            <div className="modal-footer">
+              <button
+                className="action-button secondary"
+                onClick={handleCloseModal}
+              >
+                Close
+              </button>
+              {selectedAlert.status !== "completed" && (
+                <button
+                  className="action-button primary"
+                  onClick={handleMarkAsCompleted}
+                >
+                  Mark as Completed
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
