@@ -18,6 +18,7 @@ import RegisterExpenseType from "../pages/admin/RegisterExpenseType/RegisterExpe
 import RegisterServicePricing from "../pages/admin/RegisterServicePricing/RegisterServicePricing";
 import ProjectAlert from "../pages/admin/Avisos/ProjectAlert/ProjectAlert";
 import ClientAlert from "../pages/admin/Avisos/ClientAlert/ClientAlert";
+import SubcontractorAlert from "../pages/admin/Avisos/SubcontractorAlert/SubcontractorAlert";
 export default function AdminRoutes() {
   return (
     <Routes>
@@ -28,6 +29,10 @@ export default function AdminRoutes() {
         <Route path="avisos" element={<Avisos />} />
         <Route path="manutencao-veiculos" element={<VehicleAlert />} />
         <Route path="termino-projeto" element={<ProjectAlert />} />
+        <Route
+          path="pagamento-subcontratados"
+          element={<SubcontractorAlert />}
+        />
         <Route path="recebimento-cliente" element={<ClientAlert />} />
         <Route path="cadastro-usuario" element={<RegisterUser />} />
         <Route path="cadastro-servico" element={<RegisterService />} />

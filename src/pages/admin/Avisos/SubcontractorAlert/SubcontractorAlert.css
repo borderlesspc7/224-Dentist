@@ -1,0 +1,659 @@
+.subcontractor-payment-alert {
+  padding: 32px;
+  min-height: 100vh;
+  background: #f5f5f5;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.alert-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.header-content h1 {
+  font-size: 32px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 8px;
+}
+
+.header-content p {
+  color: #64748b;
+  font-size: 16px;
+}
+
+.back-button {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px 16px;
+  color: #475569;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.back-button:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.alert-filters {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  color: #64748b;
+  width: 18px;
+  height: 18px;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 12px 12px 12px 40px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #ffffff;
+}
+
+.search-box input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.filter-group {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.filter-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 150px;
+}
+
+.filter-item label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.filter-item select {
+  padding: 8px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 14px;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.filter-item select:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.alerts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 20px;
+}
+
+.alert-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.alert-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-color: #cbd5e1;
+}
+
+.alert-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.subcontractor-info h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 4px;
+}
+
+.contact-person {
+  color: #64748b;
+  font-size: 14px;
+}
+
+.status-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.status-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.alert-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.payment-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.amount-due {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.amount-icon {
+  color: #059669;
+  width: 18px;
+  height: 18px;
+}
+
+.amount {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.payment-date {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.date-icon {
+  color: #64748b;
+  width: 16px;
+  height: 16px;
+}
+
+.date-label {
+  color: #64748b;
+}
+
+.date-value {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.alert-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.description {
+  color: #374151;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.project-ref {
+  color: #64748b;
+  font-size: 12px;
+  font-style: italic;
+}
+
+.subcontractor-details {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.detail-row .label {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.detail-row .value {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.alert-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.priority-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.priority-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.days-remaining {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.days-remaining.overdue {
+  color: #dc2626;
+}
+
+.days-remaining.due-today {
+  color: #ea580c;
+}
+
+.days-remaining.urgent {
+  color: #d97706;
+}
+
+.days-remaining.normal {
+  color: #059669;
+}
+
+.alert-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.action-btn.secondary {
+  background: #f8fafc;
+  color: #475569;
+  border-color: #e2e8f0;
+}
+
+.action-btn.secondary:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.action-btn.primary {
+  background: #3b82f6;
+  color: #ffffff;
+  border-color: #2563eb;
+}
+
+.action-btn.primary:hover {
+  background: #2563eb;
+  border-color: #1d4ed8;
+}
+
+.no-alerts {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  color: #64748b;
+}
+
+.no-alerts svg {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 16px;
+  color: #cbd5e1;
+}
+
+.no-alerts h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+.no-alerts p {
+  font-size: 14px;
+  color: #64748b;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  font-size: 16px;
+  color: #64748b;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal-content {
+  background: #ffffff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.modal-header h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #64748b;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.close-button:hover {
+  background: #f1f5f9;
+  color: #374151;
+}
+
+.modal-body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.subcontractor-info-section h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 4px;
+}
+
+.contact-info {
+  color: #64748b;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.status-priority-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.priority-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.payment-details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detail-item label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.detail-item span {
+  font-size: 14px;
+  color: #0f172a;
+  font-weight: 500;
+}
+
+.amount-large {
+  font-size: 18px;
+  font-weight: 700;
+  color: #059669;
+}
+
+.description-section,
+.notes-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.description-section label,
+.notes-section label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.description-section p,
+.notes-section p {
+  font-size: 14px;
+  color: #374151;
+  line-height: 1.5;
+  margin: 0;
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.modal-footer {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding: 20px 24px;
+  border-top: 1px solid #e2e8f0;
+  background: #f8fafc;
+  border-radius: 0 0 12px 12px;
+}
+
+.action-button {
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.action-button.secondary {
+  background: #ffffff;
+  color: #475569;
+  border-color: #e2e8f0;
+}
+
+.action-button.secondary:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.action-button.primary {
+  background: #3b82f6;
+  color: #ffffff;
+  border-color: #2563eb;
+}
+
+.action-button.primary:hover {
+  background: #2563eb;
+  border-color: #1d4ed8;
+}
+
+/* Status icon colors */
+.status-icon.paid {
+  color: #10b981;
+}
+
+.status-icon.overdue {
+  color: #ef4444;
+}
+
+.status-icon.due-today {
+  color: #f59e0b;
+}
+
+.status-icon.pending {
+  color: #3b82f6;
+}
+
+/* Fix para ícones de status no badge */
+.status-badge .status-icon {
+  color: inherit !important;
+  width: 14px;
+  height: 14px;
+}
+
+/* Cores específicas para cada status no badge */
+.status-badge .status-icon.paid {
+  color: #ffffff !important;
+}
+
+.status-badge .status-icon.overdue {
+  color: #ffffff !important;
+}
+
+.status-badge .status-icon.due-today {
+  color: #ffffff !important;
+}
+
+.status-badge .status-icon.pending {
+  color: #ffffff !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .alerts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-group {
+    flex-direction: column;
+  }
+
+  .filter-item {
+    min-width: 100%;
+  }
+
+  .payment-details-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-footer {
+    flex-direction: column;
+  }
+
+  .action-button {
+    width: 100%;
+  }
+}
