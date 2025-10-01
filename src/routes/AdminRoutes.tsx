@@ -19,6 +19,7 @@ import RegisterServicePricing from "../pages/admin/RegisterServicePricing/Regist
 import ProjectAlert from "../pages/admin/Avisos/ProjectAlert/ProjectAlert";
 import ClientAlert from "../pages/admin/Avisos/ClientAlert/ClientAlert";
 import SubcontractorAlert from "../pages/admin/Avisos/SubcontractorAlert/SubcontractorAlert";
+import ContractedServiceAlert from "../pages/admin/Avisos/ContractedServiceAlert/ContractedServiceAlert";
 export default function AdminRoutes() {
   return (
     <Routes>
@@ -34,6 +35,11 @@ export default function AdminRoutes() {
           element={<SubcontractorAlert />}
         />
         <Route path="recebimento-cliente" element={<ClientAlert />} />
+        <Route
+          path="pagamento-servicos-contratados"
+          element={<ContractedServiceAlert />}
+        />
+
         <Route path="cadastro-usuario" element={<RegisterUser />} />
         <Route path="cadastro-servico" element={<RegisterService />} />
         <Route path="cadastro-clientes" element={<RegisterClient />} />
