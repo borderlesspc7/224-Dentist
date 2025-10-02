@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { FiUser, FiFileText, FiAlertCircle } from "react-icons/fi";
 import Input from "../../../components/ui/Input/Input";
 import Button from "../../../components/ui/Button/Button";
 import "../../../styles/forms.css";
 import "./RegisterEmployee.css";
 import type { CreateEmployeeData } from "../../../types/employee";
+import { employeeService } from "../../../services/employeeService";
 
 interface FormErrors {
   name?: string;
@@ -22,6 +24,10 @@ interface FormErrors {
 }
 
 const RegisterEmployeePage: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const editId = searchParams.get("edit");
+  const isEditMode = Boolean(editId);
+
   const [formData, setFormData] = useState<CreateEmployeeData>({
     name: "",
     address: "",
@@ -35,8 +41,40 @@ const RegisterEmployeePage: React.FC = () => {
 
   const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
+  const [loadingEmployee, setLoadingEmployee] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [isDragOver, setIsDragOver] = useState(false);
+
+  // Load employee data when in edit mode
+  useEffect(() => {
+    if (isEditMode && editId) {
+      setLoadingEmployee(true);
+      employeeService
+        .getEmployeeById(editId)
+        .then((employee) => {
+          if (employee) {
+            setFormData({
+              name: employee.name || "",
+              address: employee.address || "",
+              itinNumber: employee.itinNumber || "",
+              driverLicenseNumber: employee.driverLicenseNumber || "",
+              phone: employee.phone || "",
+              emergencyContactName: employee.emergencyContactName || "",
+              emergencyContactPhone: employee.emergencyContactPhone || "",
+              emergencyContactRelationship:
+                employee.emergencyContactRelationship || "",
+            });
+          }
+        })
+        .catch((error) => {
+          console.error("Error loading employee:", error);
+          setErrors({ submit: "Erro ao carregar dados do funcionário" });
+        })
+        .finally(() => {
+          setLoadingEmployee(false);
+        });
+    }
+  }, [isEditMode, editId]);
 
   const handleInputChange = (
     field: keyof CreateEmployeeData,
@@ -94,7 +132,7 @@ const RegisterEmployeePage: React.FC = () => {
     setIsDragOver(false);
 
     const file = e.dataTransfer.files[0];
-    if (file && file.type === 'application/pdf') {
+    if (file && file.type === "application/pdf") {
       setFormData((prev) => ({
         ...prev,
         driverLicenseDocument: file,
@@ -162,23 +200,28 @@ const RegisterEmployeePage: React.FC = () => {
     try {
       console.log("Employee data to save:", formData);
 
-      // TODO: Implement employeeService.createEmployee(formData)
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      if (isEditMode && editId) {
+        // Update existing employee
+        await employeeService.updateEmployee(editId, formData);
+        setSuccessMessage("Employee updated successfully!");
+      } else {
+        // Create new employee
+        await employeeService.createEmployee(formData);
+        setSuccessMessage("Employee registered successfully!");
 
-      setSuccessMessage("Employee registered successfully!");
-
-      // Clear the form but keep the success message
-      setFormData({
-        name: "",
-        address: "",
-        itinNumber: "",
-        driverLicenseNumber: "",
-        phone: "",
-        emergencyContactName: "",
-        emergencyContactPhone: "",
-        emergencyContactRelationship: "",
-      });
-      setErrors({});
+        // Clear the form but keep the success message
+        setFormData({
+          name: "",
+          address: "",
+          itinNumber: "",
+          driverLicenseNumber: "",
+          phone: "",
+          emergencyContactName: "",
+          emergencyContactPhone: "",
+          emergencyContactRelationship: "",
+        });
+        setErrors({});
+      }
 
       // Clear success message after 3 seconds
       setTimeout(() => {
@@ -187,7 +230,7 @@ const RegisterEmployeePage: React.FC = () => {
     } catch (error) {
       setErrors({
         submit:
-          "Failed to register employee: " +
+          `Failed to ${isEditMode ? "update" : "register"} employee: ` +
           (error instanceof Error ? error.message : String(error)),
       });
     } finally {
@@ -208,19 +251,34 @@ const RegisterEmployeePage: React.FC = () => {
     });
     setErrors({});
     setSuccessMessage("");
+    setLoadingEmployee(false);
   };
 
   return (
     <div className="form-page-content">
       <div className="content-header">
-        <h1 className="page-title">Register Employee</h1>
+        <h1 className="page-title">
+          {isEditMode ? "Edit Employee" : "Register Employee"}
+        </h1>
         <p className="page-subtitle">
-          Create a new employee profile with personal details and emergency
-          contact information
+          {isEditMode
+            ? "Update employee profile with personal details and emergency contact information"
+            : "Create a new employee profile with personal details and emergency contact information"}
         </p>
       </div>
 
-      <div className={`form-container ${loading ? "form-loading" : ""}`}>
+      <div
+        className={`form-container ${
+          loading && !loadingEmployee ? "form-loading" : ""
+        }`}
+      >
+        {/* Loading Message */}
+        {loadingEmployee && (
+          <div className="status-message info-message">
+            Loading employee data...
+          </div>
+        )}
+
         {/* Success Message */}
         {successMessage && (
           <div className="status-message success-message">{successMessage}</div>
@@ -303,48 +361,69 @@ const RegisterEmployeePage: React.FC = () => {
             <div className="file-upload-container">
               <div className="form-group">
                 <label className="form-label">
-                  Driver License Document (PDF) <span className="required">*</span>
+                  Driver License Document (PDF){" "}
+                  <span className="required">*</span>
                 </label>
                 <label
-                  className={`file-upload-label ${isDragOver ? 'dragover' : ''}`}
+                  className={`file-upload-label ${
+                    isDragOver ? "dragover" : ""
+                  }`}
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
                   onDrop={handleDrop}
                   style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '24px 16px',
-                    border: '3px dashed #0ea5e9',
-                    borderRadius: '12px',
-                    background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                    position: 'relative',
-                    overflow: 'hidden',
-                    minHeight: '120px',
-                    width: '100%',
-                    boxSizing: 'border-box'
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: "24px 16px",
+                    border: "3px dashed #0ea5e9",
+                    borderRadius: "12px",
+                    background:
+                      "linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)",
+                    cursor: "pointer",
+                    transition: "all 0.3s ease",
+                    position: "relative",
+                    overflow: "hidden",
+                    minHeight: "120px",
+                    width: "100%",
+                    boxSizing: "border-box",
                   }}
                 >
-                  <div style={{ fontSize: '32px', marginBottom: '8px', opacity: 0.8 }}>📄</div>
-                  <div style={{ fontSize: '16px', fontWeight: 600, color: isDragOver ? '#059669' : '#0ea5e9', textAlign: 'center' }}>
-                    {isDragOver ? 'Drop file here to upload' : 'Click to upload driver license document'}
+                  <div
+                    style={{
+                      fontSize: "32px",
+                      marginBottom: "8px",
+                      opacity: 0.8,
+                    }}
+                  >
+                    📄
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "16px",
+                      fontWeight: 600,
+                      color: isDragOver ? "#059669" : "#0ea5e9",
+                      textAlign: "center",
+                    }}
+                  >
+                    {isDragOver
+                      ? "Drop file here to upload"
+                      : "Click to upload driver license document"}
                   </div>
                   <input
                     type="file"
                     accept=".pdf"
                     onChange={handleFileChange}
                     style={{
-                      position: 'absolute',
+                      position: "absolute",
                       top: 0,
                       left: 0,
-                      width: '100%',
-                      height: '100%',
+                      width: "100%",
+                      height: "100%",
                       opacity: 0,
-                      cursor: 'pointer',
-                      zIndex: 1
+                      cursor: "pointer",
+                      zIndex: 1,
                     }}
                     disabled={loading}
                   />
@@ -418,8 +497,18 @@ const RegisterEmployeePage: React.FC = () => {
           </div>
 
           <div className="form-actions">
-            <Button type="submit" variant="primary" disabled={loading}>
-              {loading ? "Saving Employee..." : "Save Employee"}
+            <Button
+              type="submit"
+              variant="primary"
+              disabled={loading || loadingEmployee}
+            >
+              {loading
+                ? isEditMode
+                  ? "Updating Employee..."
+                  : "Saving Employee..."
+                : isEditMode
+                ? "Update Employee"
+                : "Save Employee"}
             </Button>
             <Button
               type="button"

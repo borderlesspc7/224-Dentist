@@ -1,5 +1,23 @@
 /* Employee Registration Specific Styles */
 
+/* Page transition */
+.form-page-content {
+  animation: slideIn 0.4s ease-out;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* File Upload Styling - Enhanced */
 .file-upload-container {
   margin: 16px 0;

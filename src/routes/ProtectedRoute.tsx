@@ -3,6 +3,7 @@ import React from "react";
 import { useAuth } from "../hooks/useAuth";
 import { Navigate } from "react-router-dom";
 import { hasAccess } from "./permissions";
+import "./ProtectedRoute.css";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -15,7 +16,16 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 }) => {
   const { user, loading } = useAuth();
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) {
+    return (
+      <div className="auth-loading-container">
+        <div className="auth-loading-content">
+          <div className="auth-loading-spinner"></div>
+          <p className="auth-loading-text">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!user) return <Navigate to="/login" replace />;
 
