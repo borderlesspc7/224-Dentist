@@ -2,8 +2,7 @@ import {
   LayoutDashboardIcon,
   UserPlusIcon,
   BarChart3Icon,
-  SettingsIcon,
-  FileTextIcon,
+  UserIcon,
   BellIcon,
 } from "lucide-react";
 
@@ -30,18 +29,13 @@ export const pathOptions: PathOption[] = [
     icon: <BellIcon />,
   },
   {
+    value: "users/",
+    label: "Users",
+    icon: <UserIcon />,
+  },
+  {
     value: "relatorios",
     label: "Reports",
     icon: <BarChart3Icon />,
-  },
-  {
-    value: "documentos",
-    label: "Documents",
-    icon: <FileTextIcon />,
-  },
-  {
-    value: "configuracoes",
-    label: "Settings",
-    icon: <SettingsIcon />,
   },
 ];

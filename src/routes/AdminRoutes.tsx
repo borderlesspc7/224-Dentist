@@ -20,6 +20,7 @@ import ProjectAlert from "../pages/admin/Avisos/ProjectAlert/ProjectAlert";
 import ClientAlert from "../pages/admin/Avisos/ClientAlert/ClientAlert";
 import SubcontractorAlert from "../pages/admin/Avisos/SubcontractorAlert/SubcontractorAlert";
 import ContractedServiceAlert from "../pages/admin/Avisos/ContractedServiceAlert/ContractedServiceAlert";
+import Users from "../pages/admin/User/User";
 export default function AdminRoutes() {
   return (
     <Routes>
@@ -28,7 +29,9 @@ export default function AdminRoutes() {
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="cadastros" element={<Cadastros />} />
         <Route path="avisos" element={<Avisos />} />
+        <Route path="users" element={<Users />} />
         <Route path="manutencao-veiculos" element={<VehicleAlert />} />
+
         <Route path="termino-projeto" element={<ProjectAlert />} />
         <Route
           path="pagamento-subcontratados"

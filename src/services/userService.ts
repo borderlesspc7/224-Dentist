@@ -15,25 +15,32 @@ import {
 export const userService = {
   // Buscar todos os usuários
   async getAllUsers(): Promise<UserProfile[]> {
-    const userRef = collection(db, "users");
-    const userQuery = query(userRef, orderBy("createdAt", "desc"));
-    const userSnapshot = await getDocs(userQuery);
+    try {
+      const userRef = collection(db, "users");
+      const userSnapshot = await getDocs(userRef);
 
-    const users = userSnapshot.docs.map((doc) => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        uid: data.uid || doc.id,
-        email: data.email || "",
-        displayName: data.displayName || "",
-        role: data.role || "user",
-        allowedPaths: data.allowedPaths || [],
-        createdAt: data.createdAt?.toDate() || new Date(),
-        updatedAt: data.updatedAt?.toDate() || new Date(),
-      } as UserProfile & { id: string; createdAt: Date; updatedAt: Date };
-    });
+      const users = userSnapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          uid: data.uid || doc.id,
+          email: data.email || "",
+          displayName: data.displayName || "",
+          role: data.role || "partial",
+          allowedPaths: data.allowedPaths || [],
+          createdAt: data.createdAt?.toDate() || new Date(),
+          updatedAt: data.updatedAt?.toDate() || new Date(),
+        } as UserProfile & { id: string; createdAt: Date; updatedAt: Date };
+      });
 
-    return users;
+      // Ordenar no cliente ao invés do servidor
+      return users.sort(
+        (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+      );
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      throw error;
+    }
   },
 
   // Buscar usuário por ID
