@@ -10,8 +10,11 @@ import {
 } from "react-icons/fi";
 import { userService } from "../../../services/userService";
 import type { UserProfile } from "../../../types/user";
+import ConfirmationModal from "../../../components/ui/ConfirmationModal/ConfirmationModal";
+import { useToast } from "../../../hooks/useToast";
+import ViewUser from "./ViewUser/ViewUser";
+import EditUser from "./EditUser/EditUser";
 
-// Tipo estendido para incluir campos do serviço
 type UserWithDates = UserProfile & {
   id: string;
   createdAt: Date;
@@ -19,9 +22,33 @@ type UserWithDates = UserProfile & {
 };
 
 export default function User() {
+  const { showSuccess, showError } = useToast();
   const [users, setUsers] = useState<UserWithDates[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean;
+    record: Record<string, unknown> | null | UserWithDates;
+  }>({
+    isOpen: false,
+    record: null,
+  });
+
+  const [viewModal, setViewModal] = useState<{
+    isOpen: boolean;
+    user: UserWithDates | null;
+  }>({
+    isOpen: false,
+    user: null,
+  });
+
+  const [editModal, setEditModal] = useState<{
+    isOpen: boolean;
+    user: UserWithDates | null;
+  }>({
+    isOpen: false,
+    user: null,
+  });
 
   // Estados para filtros
   const [searchTerm, setSearchTerm] = useState("");
@@ -106,6 +133,86 @@ export default function User() {
     };
     loadUsers();
   }, []);
+
+  const handleDelete = async (
+    record: Record<string, unknown> | UserWithDates
+  ) => {
+    setDeleteModal({
+      isOpen: true,
+      record,
+    });
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteModal.record) return;
+
+    try {
+      await userService.deleteUser(String(deleteModal.record.id));
+
+      setUsers((prev) =>
+        prev.filter((user) => user.id !== deleteModal.record!.id)
+      );
+
+      calculateMetrics(users);
+
+      showSuccess(
+        "Excluído!",
+        `${deleteModal.record.displayName} removido com sucesso!`
+      );
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      showError(
+        "Falha!",
+        `Falha ao excluir ${deleteModal.record.displayName}: ${
+          error instanceof Error ? error.message : "Erro desconhecido"
+        }`
+      );
+      setError(
+        error instanceof Error ? error.message : "Falha ao excluir usuário"
+      );
+    } finally {
+      setDeleteModal({ isOpen: false, record: null });
+    }
+  };
+
+  const handleView = (user: UserWithDates) => {
+    setViewModal({
+      isOpen: true,
+      user,
+    });
+  };
+
+  const handleSaveEdit = async (updates: Partial<UserWithDates>) => {
+    if (!editModal.user) return;
+
+    const id = editModal.user.id;
+    await userService.updateUser(id, {
+      displayName: updates.displayName,
+      role: updates.role,
+      allowedPaths: updates.allowedPaths,
+      email: updates.email,
+    });
+
+    setUsers((prev) => {
+      const next = prev.map((u) =>
+        u.id === id ? { ...u, ...updates, updatedAt: new Date() } : u
+      );
+      calculateMetrics(next);
+      return next;
+    });
+    setEditModal({ isOpen: false, user: null });
+    showSuccess(
+      "Atualizado!",
+      `${editModal.user.displayName} atualizado com sucesso!`
+    );
+  };
+
+  const handleEdit = (user: UserWithDates) => {
+    setEditModal({
+      isOpen: true,
+      user,
+    });
+  };
 
   return (
     <div className="users-container">
@@ -255,13 +362,22 @@ export default function User() {
                 </p>
               </div>
               <div className="card-actions">
-                <button className="action-btn view">
+                <button
+                  className="action-btn view"
+                  onClick={() => handleView(user)}
+                >
                   <FiEye />
                 </button>
-                <button className="action-btn edit">
+                <button
+                  className="action-btn edit"
+                  onClick={() => handleEdit(user)}
+                >
                   <FiEdit />
                 </button>
-                <button className="action-btn delete">
+                <button
+                  className="action-btn delete"
+                  onClick={() => handleDelete(user)}
+                >
                   <FiTrash />
                 </button>
               </div>
@@ -294,6 +410,31 @@ export default function User() {
             </p>
           </div>
         )}
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, record: null })}
+        onConfirm={confirmDelete}
+        title="Confirmar Exclusão"
+        message={`Tem certeza que deseja excluir "${deleteModal.record?.displayName}"? Esta ação não pode ser desfeita.`}
+        confirmText="Excluir"
+        cancelText="Cancelar"
+        type="danger"
+      />
+
+      <ViewUser
+        isOpen={viewModal.isOpen}
+        onClose={() => setViewModal({ isOpen: false, user: null })}
+        user={viewModal.user!}
+      />
+
+      <EditUser
+        isOpen={editModal.isOpen}
+        onClose={() => setEditModal({ isOpen: false, user: null })}
+        user={editModal.user}
+        onSave={handleSaveEdit}
+      />
     </div>
   );
 }

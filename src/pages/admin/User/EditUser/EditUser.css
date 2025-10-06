@@ -1,0 +1,233 @@
+/* Overlay */
+.edit-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5); /* slate-900/50 */
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 999;
+  animation: overlayFade 0.25s ease-out;
+}
+
+@keyframes overlayFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Container */
+.edit-modal {
+  width: 100%;
+  max-width: 760px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 24px;
+  border: 1px solid rgba(226, 232, 240, 0.9); /* slate-200 */
+  box-shadow: 0 25px 50px -12px rgba(2, 132, 199, 0.25); /* sky-600 */
+  overflow: hidden;
+  transform: scale(0.98);
+  animation: modalIn 0.25s ease-out forwards;
+  position: relative;
+}
+
+@keyframes modalIn {
+  to {
+    transform: scale(1);
+  }
+}
+
+/* Top gradient line */
+.edit-modal::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899);
+}
+
+/* Header */
+.edit-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.edit-modal-header h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+
+.close-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.close-btn:hover {
+  transform: translateY(-1px);
+  background: #ffffff;
+  box-shadow: 0 8px 16px -6px rgba(15, 23, 42, 0.15);
+}
+
+/* Body (Form) */
+.edit-modal-body {
+  padding: 20px 24px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 16px;
+  align-items: start;
+  padding: 10px 0;
+}
+
+@media (max-width: 640px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-label {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 800;
+  color: #334155;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding-top: 10px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea {
+  width: 100%;
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px 14px;
+  transition: all 0.2s ease;
+}
+
+.form-field textarea {
+  resize: vertical;
+  min-height: 92px;
+}
+
+.form-field input::placeholder,
+.form-field textarea::placeholder {
+  color: #94a3b8;
+}
+
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+  transform: translateY(-1px);
+}
+
+.error-text {
+  color: #dc2626;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.hint-text {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Footer (Actions) */
+.edit-modal-footer {
+  padding: 16px 24px 24px 24px;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.btn-primary,
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 120px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid #e2e8f0;
+}
+
+.btn-secondary {
+  background: #f8fafc;
+  color: #334155;
+}
+.btn-secondary:hover {
+  transform: translateY(-1px);
+  background: #ffffff;
+  box-shadow: 0 10px 20px -10px rgba(2, 132, 199, 0.25);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #3b82f6 0%, #0ea5e9 100%);
+  color: #ffffff;
+  border-color: transparent;
+  box-shadow: 0 6px 14px -6px rgba(59, 130, 246, 0.5);
+}
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px -10px rgba(59, 130, 246, 0.5);
+}
+
+.btn-primary:disabled,
+.btn-secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .edit-modal-overlay,
+  .edit-modal,
+  .form-field input,
+  .form-field select,
+  .form-field textarea,
+  .btn-primary,
+  .btn-secondary {
+    animation: none;
+    transition: none;
+  }
+}
