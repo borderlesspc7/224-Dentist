@@ -4,6 +4,7 @@ import {
   BarChart3Icon,
   UserIcon,
   BellIcon,
+  FilesIcon,
 } from "lucide-react";
 
 interface PathOption {
@@ -17,6 +18,11 @@ export const pathOptions: PathOption[] = [
     value: "dashboard",
     label: "Dashboard",
     icon: <LayoutDashboardIcon />,
+  },
+  {
+    value: "Managment",
+    label: "Managment",
+    icon: <FilesIcon />,
   },
   {
     value: "cadastros",

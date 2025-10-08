@@ -1,6 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import AdminLayout from "../pages/admin/AdminLayout";
-import Dashboard from "../pages/admin/Dashboard/Dashboard";
+import Managment from "../pages/admin/Managment/Managment";
 import Cadastros from "../pages/admin/Cadastros/Cadastros";
 import Avisos from "../pages/admin/Avisos/Avisos";
 import VehicleAlert from "../pages/admin/Avisos/VehicleAlert/VehicleAlert";
@@ -22,12 +22,15 @@ import SubcontractorAlert from "../pages/admin/Avisos/SubcontractorAlert/Subcont
 import ContractedServiceAlert from "../pages/admin/Avisos/ContractedServiceAlert/ContractedServiceAlert";
 import Users from "../pages/admin/User/User";
 import Reports from "../pages/admin/Reports/Reports";
+import Dashboard from "../pages/admin/Dashboard/Dashboard";
+
 export default function AdminRoutes() {
   return (
     <Routes>
       <Route path="/" element={<AdminLayout />}>
         <Route index element={<Dashboard />} />
         <Route path="dashboard" element={<Dashboard />} />
+        <Route path="managment" element={<Managment />} />
         <Route path="cadastros" element={<Cadastros />} />
         <Route path="avisos" element={<Avisos />} />
         <Route path="users" element={<Users />} />

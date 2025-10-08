@@ -1,517 +1,440 @@
-import React, { useState } from "react";
-import "./Dashboard.css";
-import DataTable from "../../../components/ui/DataTable/DataTable";
+import { useMemo } from "react";
 import { useDashboardData } from "../../../hooks/useDashboardData";
+import { useNavigation } from "../../../hooks/useNavigation";
 import {
   UsersIcon,
   UserPlusIcon,
   ServerIcon,
   CreditCardIcon,
   CarIcon,
-  PlusIcon,
   HomeIcon,
   WalletIcon,
   FileTextIcon,
   DollarSignIcon,
+  TrendingUpIcon,
+  AlertCircleIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  ArrowUpIcon,
+  ArrowDownIcon,
+  BellIcon,
+  RefreshCwIcon,
 } from "lucide-react";
-import { useToast } from "../../../hooks/useToast";
-import ConfirmationModal from "../../../components/ui/ConfirmationModal/ConfirmationModal";
+import "./Dashboard.css";
 
-interface DashboardSection {
+interface StatCard {
   id: string;
   title: string;
+  count: number;
   icon: React.ReactNode;
-  description: string;
-  route: string;
+  color: string;
+  trend?: {
+    value: number;
+    isPositive: boolean;
+  };
+  route?: string;
 }
 
-const dashboardSections: DashboardSection[] = [
-  {
-    id: "users",
-    title: "Users",
-    icon: <UserPlusIcon />,
-    description: "Manage system users and their permissions",
-    route: "/dashboard/users",
-  },
-  {
-    id: "services",
-    title: "Services",
-    icon: <ServerIcon />,
-    description: "Manage available services",
-    route: "/dashboard/services",
-  },
-  {
-    id: "clients",
-    title: "Clients",
-    icon: <UsersIcon />,
-    description: "Manage client information and records",
-    route: "/dashboard/clients",
-  },
-  {
-    id: "employees",
-    title: "Employees",
-    icon: <UserPlusIcon />,
-    description: "Manage employee profiles and information",
-    route: "/dashboard/employees",
-  },
-  {
-    id: "subcontractors",
-    title: "Subcontractors",
-    icon: <UserPlusIcon />,
-    description: "Manage subcontractor information",
-    route: "/dashboard/subcontractors",
-  },
-  {
-    id: "contract-services",
-    title: "Contract Services",
-    icon: <ServerIcon />,
-    description: "Manage contracted services",
-    route: "/dashboard/contract-services",
-  },
-  {
-    id: "financings",
-    title: "Financings",
-    icon: <CreditCardIcon />,
-    description: "Manage financing information",
-    route: "/dashboard/financings",
-  },
-  {
-    id: "vehicles",
-    title: "Vehicles",
-    icon: <CarIcon />,
-    description: "Manage vehicle fleet and information",
-    route: "/dashboard/vehicles",
-  },
-  {
-    id: "bank-accounts",
-    title: "Bank Accounts",
-    icon: <HomeIcon />,
-    description: "Manage bank accounts and financial information",
-    route: "/dashboard/bank-accounts",
-  },
-  {
-    id: "credit-cards",
-    title: "Credit Cards",
-    icon: <WalletIcon />,
-    description: "Manage credit cards for teams and operations",
-    route: "/dashboard/credit-cards",
-  },
-  {
-    id: "expense-types",
-    title: "Expense Types",
-    icon: <FileTextIcon />,
-    description: "Manage expense categories and types",
-    route: "/dashboard/expense-types",
-  },
-  {
-    id: "service-pricing",
-    title: "Service Pricing",
-    icon: <DollarSignIcon />,
-    description: "Manage service pricing by client",
-    route: "/dashboard/service-pricing",
-  },
-];
+interface Alert {
+  id: string;
+  type: "warning" | "info" | "error" | "success";
+  title: string;
+  message: string;
+  time: string;
+}
 
 export default function Dashboard() {
-  const [selectedSection, setSelectedSection] = useState<string | null>(null);
   const { data, loading, refreshData } = useDashboardData();
-  const { showSuccess, showError } = useToast();
-  const [deleteModal, setDeleteModal] = useState<{
-    isOpen: boolean;
-    record: Record<string, unknown> | null;
-  }>({
-    isOpen: false,
-    record: null,
-  });
+  const { goTo } = useNavigation();
 
-  const handleSectionClick = (sectionId: string) => {
-    setSelectedSection(selectedSection === sectionId ? null : sectionId);
-  };
-
-  // Mapeamento das rotas para cada seção (rotas relativas dentro do admin)
-  const getRouteForSection = (sectionId: string): string => {
-    const routes: Record<string, string> = {
-      users: "cadastro-usuario",
-      services: "cadastro-servico",
-      clients: "cadastro-clientes",
-      employees: "cadastro-funcionario",
-      subcontractors: "cadastro-subcontratados",
-      "contract-services": "cadastro-servicos-contratados",
-      financings: "cadastro-financiamentos",
-      vehicles: "cadastro-veiculos",
-      "bank-accounts": "cadastro-conta-bancaria",
-      "credit-cards": "cadastro-cartao-credito",
-      "expense-types": "cadastro-tipo-despesa",
-      "service-pricing": "cadastro-preco-servico",
-    };
-    return routes[sectionId] || "";
-  };
-
-  // Get real data from Firestore
-  const getRealData = (sectionId: string) => {
-    const dataMapping: Record<string, keyof typeof data> = {
-      users: "users",
-      services: "services",
-      clients: "clients",
-      employees: "employees",
-      subcontractors: "subcontractors",
-      "contract-services": "contractServices",
-      financings: "financings",
-      vehicles: "vehicles",
-      "bank-accounts": "bankAccounts",
-      "credit-cards": "creditCards",
-      "expense-types": "expenseTypes",
-      "service-pricing": "servicePricing",
-    };
-
-    const dataKey = dataMapping[sectionId];
-    const sectionData = dataKey ? data[dataKey] || [] : [];
-
-    // Transform data to match table format
-    return sectionData.map((item: Record<string, unknown>) => {
-      const baseItem = {
-        id: item.id || item.uid || "N/A",
-        name: item.name || item.displayName || item.fullName || "N/A",
-        status: item.status || "active",
-        created:
-          item.createdAt &&
-          typeof item.createdAt === "object" &&
-          "toDate" in item.createdAt
-            ? (item.createdAt as { toDate: () => Date })
-                .toDate()
-                .toLocaleDateString()
-            : "N/A",
-      };
-
-      // Add specific fields based on section type
-      switch (sectionId) {
-        case "users":
-          return {
-            ...baseItem,
-            email: item.email || "N/A",
-            role: item.role || "N/A",
-          };
-        case "clients":
-          return {
-            ...baseItem,
-            company: item.company || "N/A",
-            phone: item.phone || "N/A",
-          };
-        case "services":
-          return {
-            ...baseItem,
-            description: item.description || "N/A",
-            price: item.price || "N/A",
-          };
-        case "subcontractors":
-          return {
-            ...baseItem,
-            company: item.company || "N/A",
-            phone: item.phone || "N/A",
-          };
-        case "contractServices":
-          return {
-            ...baseItem,
-            service: item.serviceName || "N/A",
-            client: item.clientName || "N/A",
-          };
-        case "employees":
-          return {
-            ...baseItem,
-            driverLicenseDocument: item.driverLicenseDocument || "N/A",
-          };
-        case "financings":
-          return {
-            ...baseItem,
-            amount: item.amount || "N/A",
-            status: item.financingStatus || "N/A",
-          };
-        case "vehicles":
-          return {
-            ...baseItem,
-            make: item.make || "N/A",
-            model: item.model || "N/A",
-            license: item.licensePlate || "N/A",
-          };
-        default:
-          return baseItem;
-      }
-    });
-  };
-
-  const getColumns = (sectionId: string) => {
-    const baseColumns = [
-      { key: "id", label: "ID", width: "80px" },
-      { key: "name", label: "Name" },
+  // Calculate statistics
+  const stats: StatCard[] = useMemo(
+    () => [
       {
-        key: "status",
-        label: "Status",
-        width: "120px",
-        render: (value: string) => (
-          <span className={`status-badge ${value}`}>
-            {value.charAt(0).toUpperCase() + value.slice(1)}
-          </span>
-        ),
+        id: "users",
+        title: "Total Users",
+        count: data.users.length,
+        icon: <UsersIcon />,
+        color: "#0ea5e9",
+        trend: { value: 12, isPositive: true },
+        route: "/admin/cadastro-usuario",
       },
-      { key: "created", label: "Created", width: "120px" },
-    ];
+      {
+        id: "clients",
+        title: "Clients",
+        count: data.clients.length,
+        icon: <UserPlusIcon />,
+        color: "#8b5cf6",
+        trend: { value: 8, isPositive: true },
+        route: "/admin/cadastro-clientes",
+      },
+      {
+        id: "employees",
+        title: "Employees",
+        count: data.employees.length,
+        icon: <UserPlusIcon />,
+        color: "#10b981",
+        trend: { value: 5, isPositive: false },
+        route: "/admin/cadastro-funcionario",
+      },
+      {
+        id: "services",
+        title: "Services",
+        count: data.services.length,
+        icon: <ServerIcon />,
+        color: "#f59e0b",
+        route: "/admin/cadastro-servico",
+      },
+      {
+        id: "subcontractors",
+        title: "Subcontractors",
+        count: data.subcontractors.length,
+        icon: <UserPlusIcon />,
+        color: "#06b6d4",
+        route: "/admin/cadastro-subcontratados",
+      },
+      {
+        id: "contract-services",
+        title: "Contract Services",
+        count: data.contractServices.length,
+        icon: <FileTextIcon />,
+        color: "#ec4899",
+        route: "/admin/cadastro-servicos-contratados",
+      },
+      {
+        id: "vehicles",
+        title: "Vehicles",
+        count: data.vehicles.length,
+        icon: <CarIcon />,
+        color: "#6366f1",
+        route: "/admin/cadastro-veiculos",
+      },
+      {
+        id: "financings",
+        title: "Financings",
+        count: data.financings.length,
+        icon: <CreditCardIcon />,
+        color: "#ef4444",
+        route: "/admin/cadastro-financiamentos",
+      },
+      {
+        id: "bank-accounts",
+        title: "Bank Accounts",
+        count: data.bankAccounts.length,
+        icon: <HomeIcon />,
+        color: "#14b8a6",
+        route: "/admin/cadastro-conta-bancaria",
+      },
+      {
+        id: "credit-cards",
+        title: "Credit Cards",
+        count: data.creditCards.length,
+        icon: <WalletIcon />,
+        color: "#f97316",
+        route: "/admin/cadastro-cartao-credito",
+      },
+      {
+        id: "expense-types",
+        title: "Expense Types",
+        count: data.expenseTypes.length,
+        icon: <FileTextIcon />,
+        color: "#84cc16",
+        route: "/admin/cadastro-tipo-despesa",
+      },
+      {
+        id: "service-pricing",
+        title: "Service Pricing",
+        count: data.servicePricing.length,
+        icon: <DollarSignIcon />,
+        color: "#a855f7",
+        route: "/admin/cadastro-preco-servico",
+      },
+    ],
+    [data]
+  );
 
-    // Add specific columns based on section type
-    switch (sectionId) {
-      case "users":
-        return [
-          ...baseColumns,
-          { key: "email", label: "Email" },
-          { key: "role", label: "Role", width: "120px" },
-        ];
-      case "clients":
-        return [
-          ...baseColumns,
-          { key: "company", label: "Company" },
-          { key: "phone", label: "Phone", width: "140px" },
-        ];
-      case "services":
-        return [
-          ...baseColumns,
-          { key: "description", label: "Description" },
-          { key: "price", label: "Price", width: "100px" },
-        ];
-      case "subcontractors":
-        return [
-          ...baseColumns,
-          { key: "company", label: "Company" },
-          { key: "phone", label: "Phone", width: "140px" },
-        ];
-      case "contractServices":
-        return [
-          ...baseColumns,
-          { key: "service", label: "Service" },
-          { key: "client", label: "Client" },
-        ];
-      case "financings":
-        return [
-          ...baseColumns,
-          { key: "amount", label: "Amount", width: "120px" },
-          { key: "status", label: "Status", width: "120px" },
-        ];
-      case "vehicles":
-        return [
-          ...baseColumns,
-          { key: "make", label: "Make", width: "100px" },
-          { key: "model", label: "Model", width: "100px" },
-          { key: "license", label: "License", width: "100px" },
-        ];
+  // Mock alerts (as requested, since alerts system is mocked)
+  const recentAlerts: Alert[] = useMemo(
+    () => [
+      {
+        id: "1",
+        type: "warning",
+        title: "Payment Overdue",
+        message: "Invoice #2024-045 from ABC Corp is 5 days overdue",
+        time: "2 hours ago",
+      },
+      {
+        id: "2",
+        type: "error",
+        title: "Vehicle Maintenance",
+        message: "Ford F-150 (ABC-1234) requires urgent maintenance",
+        time: "5 hours ago",
+      },
+      {
+        id: "3",
+        type: "info",
+        title: "New Client Added",
+        message: "John Doe Services LLC has been added to the system",
+        time: "1 day ago",
+      },
+      {
+        id: "4",
+        type: "success",
+        title: "Contract Completed",
+        message: "Pipeline Installation project completed successfully",
+        time: "2 days ago",
+      },
+      {
+        id: "5",
+        type: "warning",
+        title: "License Expiring",
+        message: "Driver's license for Maria Silva expires in 15 days",
+        time: "3 days ago",
+      },
+    ],
+    []
+  );
+
+  // Calculate totals
+  const totalRecords = useMemo(
+    () => stats.reduce((acc, stat) => acc + stat.count, 0),
+    [stats]
+  );
+
+  const handleStatClick = (route?: string) => {
+    if (route) {
+      window.location.href = route;
+    }
+  };
+
+  const handleRefresh = async () => {
+    await refreshData();
+  };
+
+  const getAlertIcon = (type: Alert["type"]) => {
+    switch (type) {
+      case "warning":
+        return <AlertCircleIcon />;
+      case "error":
+        return <AlertCircleIcon />;
+      case "info":
+        return <BellIcon />;
+      case "success":
+        return <CheckCircleIcon />;
       default:
-        return baseColumns;
+        return <BellIcon />;
     }
   };
 
-  const handleView = (record: Record<string, unknown>) => {
-    console.log("View record:", record);
-    // Navegar para a página de visualização (pode ser implementado depois)
-    alert(
-      `Visualizando ${record.name} (ID: ${record.id})\n\nFuncionalidade de visualização será implementada em breve.`
-    );
-  };
-
-  const handleEdit = (record: Record<string, unknown>) => {
-    console.log("Edit record:", record);
-    console.log("Selected section:", selectedSection);
-
-    if (!selectedSection) {
-      alert(
-        "Por favor, selecione uma seção primeiro clicando em um dos cards acima."
-      );
-      return;
-    }
-
-    // Navegar para a página de edição
-    const route = getRouteForSection(selectedSection);
-    console.log("Navigating to:", route);
-
-    // Teste com window.location para ver se o problema é com React Router
-    if (route) {
-      window.location.href = `/admin/${route}?edit=${record.id}`;
-    } else {
-      console.error("Route not found for section:", selectedSection);
-      alert("Rota não encontrada para a seção selecionada.");
-    }
-  };
-
-  const handleDelete = async (record: Record<string, unknown>) => {
-    setDeleteModal({
-      isOpen: true,
-      record,
-    });
-  };
-
-  const confirmDelete = async () => {
-    if (!deleteModal.record) return;
-
-    try {
-      // Import services dynamically based on section
-      const { userService } = await import("../../../services/userService");
-      const { clientService } = await import("../../../services/clientService");
-      const { serviceService } = await import(
-        "../../../services/serviceService"
-      );
-      const { employeeService } = await import(
-        "../../../services/employeeService"
-      );
-      const { subcontractorService } = await import(
-        "../../../services/subcontractorService"
-      );
-      const { contractServiceService } = await import(
-        "../../../services/contractServiceService"
-      );
-      const { financingService } = await import(
-        "../../../services/financingService"
-      );
-      const { vehicleService } = await import(
-        "../../../services/vehicleService"
-      );
-
-      // Delete based on section type
-      const recordId = String(deleteModal.record.id);
-      switch (selectedSection) {
-        case "users":
-          await userService.deleteUser(recordId);
-          break;
-        case "clients":
-          await clientService.deleteClient(recordId);
-          break;
-        case "services":
-          await serviceService.deleteService(recordId);
-          break;
-        case "employees":
-          await employeeService.deleteEmployee(recordId);
-          break;
-        case "subcontractors":
-          await subcontractorService.deleteSubcontractor(recordId);
-          break;
-        case "contractServices":
-          await contractServiceService.deleteContractService(recordId);
-          break;
-        case "financings":
-          await financingService.deleteFinancing(recordId);
-          break;
-        case "vehicles":
-          await vehicleService.deleteVehicle(recordId);
-          break;
-        default:
-          throw new Error("Tipo de seção desconhecido");
-      }
-
-      // Refresh data after deletion
-      await refreshData();
-      showSuccess(
-        "Excluído!",
-        `${deleteModal.record.name} removido com sucesso!`
-      );
-    } catch (error) {
-      console.error("Error deleting record:", error);
-      showError(
-        "Falha!",
-        `Falha ao excluir ${deleteModal.record.name}: ${
-          error instanceof Error ? error.message : "Erro desconhecido"
-        }`
-      );
-    } finally {
-      setDeleteModal({ isOpen: false, record: null });
-    }
-  };
-
-  const handleAddNew = () => {
-    console.log("Add new record");
-    console.log("Selected section:", selectedSection);
-
-    if (!selectedSection) {
-      alert(
-        "Por favor, selecione uma seção primeiro clicando em um dos cards acima."
-      );
-      return;
-    }
-
-    // Navegar para a página de registro da seção selecionada
-    const route = getRouteForSection(selectedSection);
-    console.log("Navigating to:", route);
-
-    // Teste com window.location para ver se o problema é com React Router
-    if (route) {
-      window.location.href = `/admin/${route}`;
-    } else {
-      console.error("Route not found for section:", selectedSection);
-      alert("Rota não encontrada para a seção selecionada.");
-    }
-  };
-
-  const renderSectionContent = (sectionId: string) => {
-    const sectionData = getRealData(sectionId);
-    const columns = getColumns(sectionId);
-
+  if (loading) {
     return (
-      <div className="section-content">
-        <div className="section-header">
-          <h3>
-            Manage {sectionId.charAt(0).toUpperCase() + sectionId.slice(1)}
-          </h3>
-          <button className="add-button" onClick={handleAddNew}>
-            <PlusIcon />
-            Add New
-          </button>
+      <div className="dashboard">
+        <div className="dashboard-loading">
+          <div className="loading-spinner"></div>
+          <p>Loading dashboard data...</p>
         </div>
-        <DataTable
-          columns={columns}
-          data={sectionData}
-          onView={handleView}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          loading={loading}
-          emptyMessage=""
-        />
       </div>
     );
-  };
+  }
 
   return (
     <div className="dashboard">
-      <div className="dashboard-content">
-        <div className="sections-grid">
-          {dashboardSections.map((section) => (
-            <div
-              key={section.id}
-              className={`section-card ${
-                selectedSection === section.id ? "active" : ""
-              }`}
-              onClick={() => handleSectionClick(section.id)}
-            >
-              <div className="section-icon">{section.icon}</div>
-              <div className="section-info">
-                <h3>{section.title}</h3>
-                <p>{section.description}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {selectedSection && (
-          <div className="section-details">
-            {renderSectionContent(selectedSection)}
+      <div className="dashboard-header">
+        <div className="dashboard-header-content">
+          <div className="dashboard-header-text">
+            <h1>Dashboard Overview</h1>
+            <p>Monitor and manage your business operations</p>
           </div>
-        )}
+          <button className="refresh-button" onClick={handleRefresh}>
+            <RefreshCwIcon />
+            Refresh Data
+          </button>
+        </div>
       </div>
 
-      {/* Confirmation Modal */}
-      <ConfirmationModal
-        isOpen={deleteModal.isOpen}
-        onClose={() => setDeleteModal({ isOpen: false, record: null })}
-        onConfirm={confirmDelete}
-        title="Confirmar Exclusão"
-        message={`Tem certeza que deseja excluir "${deleteModal.record?.name}"? Esta ação não pode ser desfeita.`}
-        confirmText="Excluir"
-        cancelText="Cancelar"
-        type="danger"
-      />
+      {/* Summary Cards */}
+      <div className="dashboard-summary">
+        <div className="summary-card summary-card-primary">
+          <div className="summary-card-icon">
+            <TrendingUpIcon />
+          </div>
+          <div className="summary-card-content">
+            <h3>Total Records</h3>
+            <p className="summary-card-value">{totalRecords}</p>
+            <span className="summary-card-label">Across all categories</span>
+          </div>
+        </div>
+
+        <div className="summary-card summary-card-success">
+          <div className="summary-card-icon">
+            <CheckCircleIcon />
+          </div>
+          <div className="summary-card-content">
+            <h3>Active Services</h3>
+            <p className="summary-card-value">{data.contractServices.length}</p>
+            <span className="summary-card-label">Currently running</span>
+          </div>
+        </div>
+
+        <div className="summary-card summary-card-warning">
+          <div className="summary-card-icon">
+            <ClockIcon />
+          </div>
+          <div className="summary-card-content">
+            <h3>Pending Alerts</h3>
+            <p className="summary-card-value">
+              {
+                recentAlerts.filter(
+                  (a) => a.type === "warning" || a.type === "error"
+                ).length
+              }
+            </p>
+            <span className="summary-card-label">Require attention</span>
+          </div>
+        </div>
+
+        <div className="summary-card summary-card-info">
+          <div className="summary-card-icon">
+            <UsersIcon />
+          </div>
+          <div className="summary-card-content">
+            <h3>Team Members</h3>
+            <p className="summary-card-value">
+              {data.employees.length + data.users.length}
+            </p>
+            <span className="summary-card-label">Users & Employees</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content Grid */}
+      <div className="dashboard-content">
+        {/* Statistics Grid */}
+        <div className="dashboard-section">
+          <div className="section-header">
+            <h2>System Statistics</h2>
+            <p>Real-time data from your database</p>
+          </div>
+
+          <div className="stats-grid">
+            {stats.map((stat) => (
+              <div
+                key={stat.id}
+                className="stat-card"
+                onClick={() => handleStatClick(stat.route)}
+                style={{ cursor: stat.route ? "pointer" : "default" }}
+              >
+                <div className="stat-card-header">
+                  <div
+                    className="stat-card-icon"
+                    style={{ background: `${stat.color}15`, color: stat.color }}
+                  >
+                    {stat.icon}
+                  </div>
+                  {stat.trend && (
+                    <div
+                      className={`stat-trend ${
+                        stat.trend.isPositive ? "positive" : "negative"
+                      }`}
+                    >
+                      {stat.trend.isPositive ? (
+                        <ArrowUpIcon />
+                      ) : (
+                        <ArrowDownIcon />
+                      )}
+                      <span>{stat.trend.value}%</span>
+                    </div>
+                  )}
+                </div>
+                <div className="stat-card-content">
+                  <h3>{stat.title}</h3>
+                  <p className="stat-count" style={{ color: stat.color }}>
+                    {stat.count}
+                  </p>
+                  <span className="stat-label">Registered</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Recent Alerts */}
+        <div className="dashboard-section">
+          <div className="section-header">
+            <h2>Recent Alerts</h2>
+            <p>Latest notifications and system alerts</p>
+          </div>
+
+          <div className="alerts-container">
+            {recentAlerts.map((alert) => (
+              <div key={alert.id} className={`alert-card alert-${alert.type}`}>
+                <div className="alert-icon">{getAlertIcon(alert.type)}</div>
+                <div className="alert-content">
+                  <div className="alert-header">
+                    <h4>{alert.title}</h4>
+                    <span className="alert-time">{alert.time}</span>
+                  </div>
+                  <p>{alert.message}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="alerts-footer">
+            <button
+              className="view-all-button"
+              onClick={() => goTo("/admin/avisos")}
+            >
+              View All Alerts
+            </button>
+          </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="dashboard-section">
+          <div className="section-header">
+            <h2>Quick Actions</h2>
+            <p>Frequently used operations</p>
+          </div>
+
+          <div className="quick-actions">
+            <button
+              className="quick-action-btn"
+              onClick={() =>
+                (window.location.href = "/admin/cadastro-clientes")
+              }
+            >
+              <UserPlusIcon />
+              <span>Add New Client</span>
+            </button>
+            <button
+              className="quick-action-btn"
+              onClick={() =>
+                (window.location.href = "/admin/cadastro-servicos-contratados")
+              }
+            >
+              <FileTextIcon />
+              <span>New Service Contract</span>
+            </button>
+            <button
+              className="quick-action-btn"
+              onClick={() =>
+                (window.location.href = "/admin/cadastro-funcionario")
+              }
+            >
+              <UserPlusIcon />
+              <span>Add Employee</span>
+            </button>
+            <button
+              className="quick-action-btn"
+              onClick={() => (window.location.href = "/admin/relatorios")}
+            >
+              <FileTextIcon />
+              <span>Generate Report</span>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
