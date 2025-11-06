@@ -11,25 +11,10 @@ import {
   XCircleIcon,
   DollarSignIcon,
 } from "lucide-react";
-import type { ContractService } from "../../../../types/contractService";
+import { contractedServicePaymentService } from "../../../../services/contractedServicePaymentService";
+import type { ContractedServicePaymentAlertData } from "../../../../services/contractedServicePaymentService";
 
-interface ContractedServicePaymentAlert {
-  id: string;
-  contractServiceId: string;
-  contractService: ContractService;
-  lastServiceDate: string;
-  nextPaymentDate: string;
-  amountDue: number;
-  currency: string;
-  status: "pending" | "overdue" | "due-today" | "paid";
-  priority: "low" | "medium" | "high";
-  description: string;
-  responsiblePerson: string;
-  lastUpdate: string;
-  serviceDescription?: string;
-  projectReference?: string;
-  paymentTerms: "7" | "15" | "30" | "45" | "60";
-}
+type ContractedServicePaymentAlert = ContractedServicePaymentAlertData;
 
 const ContractedServicePaymentAlert: React.FC = () => {
   const navigate = useNavigate();
@@ -54,156 +39,22 @@ const ContractedServicePaymentAlert: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    const mockContractServices: ContractService[] = [
-      {
-        id: "cs1",
-        serviceName: "Underground Pipeline Installation",
-        clientId: "c1",
-        clientName: "City Water Department",
-        projectNumber: "PROJ-2024-001",
-        contractNumber: "CNT-2024-001",
-        startDate: "2024-01-15",
-        endDate: "2024-06-15",
-        estimatedDuration: "5 months",
-        status: "in_progress",
-        serviceType: "Infrastructure",
-        description: "Main water pipeline installation project",
-        location: {
-          address: "123 Main Street",
-          city: "Los Angeles",
-          state: "CA",
-          zipCode: "90210",
-        },
-        budget: {
-          estimatedCost: 150000,
-          actualCost: 120000,
-          currency: "USD",
-        },
-        requirements: ["Excavation permit", "Safety certification"],
-        deliverables: ["Pipeline installation", "Testing report"],
-        notes: "High priority project",
-        createdAt: new Date("2024-01-01"),
-        updatedAt: new Date("2024-01-15"),
-      },
-      {
-        id: "cs2",
-        serviceName: "Sewer System Maintenance",
-        clientId: "c2",
-        clientName: "Metro Utilities",
-        projectNumber: "PROJ-2024-002",
-        contractNumber: "CNT-2024-002",
-        startDate: "2024-02-01",
-        endDate: "2024-03-01",
-        estimatedDuration: "1 month",
-        status: "completed",
-        serviceType: "Maintenance",
-        description: "Quarterly sewer system maintenance",
-        location: {
-          address: "456 Oak Avenue",
-          city: "Houston",
-          state: "TX",
-          zipCode: "77001",
-        },
-        budget: {
-          estimatedCost: 45000,
-          actualCost: 42000,
-          currency: "USD",
-        },
-        requirements: ["Maintenance permit", "Equipment access"],
-        deliverables: ["Maintenance report", "System testing"],
-        notes: "Routine maintenance",
-        createdAt: new Date("2024-01-15"),
-        updatedAt: new Date("2024-02-28"),
-      },
-      {
-        id: "cs3",
-        serviceName: "Drainage System Upgrade",
-        clientId: "c3",
-        clientName: "County Public Works",
-        projectNumber: "PROJ-2024-003",
-        contractNumber: "CNT-2024-003",
-        startDate: "2024-01-10",
-        endDate: "2024-04-10",
-        estimatedDuration: "3 months",
-        status: "in_progress",
-        serviceType: "Upgrade",
-        description: "Storm drainage system upgrade",
-        location: {
-          address: "789 Pine Street",
-          city: "Miami",
-          state: "FL",
-          zipCode: "33101",
-        },
-        budget: {
-          estimatedCost: 85000,
-          actualCost: 78000,
-          currency: "USD",
-        },
-        requirements: ["Environmental permit", "Traffic control"],
-        deliverables: ["Upgraded system", "Performance report"],
-        notes: "Weather dependent project",
-        createdAt: new Date("2024-01-05"),
-        updatedAt: new Date("2024-01-20"),
-      },
-    ];
+    const fetchAlerts = async () => {
+      try {
+        setLoading(true);
+        const fetchedAlerts = await contractedServicePaymentService.getAllContractedServicePaymentAlerts();
+        setAlerts(fetchedAlerts);
+        setFilteredAlerts(fetchedAlerts);
+      } catch (error) {
+        console.error("Error fetching contracted service payment alerts:", error);
+        setAlerts([]);
+        setFilteredAlerts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    const mockAlerts: ContractedServicePaymentAlert[] = [
-      {
-        id: "1",
-        contractServiceId: "cs1",
-        contractService: mockContractServices[0],
-        lastServiceDate: "2024-01-20",
-        nextPaymentDate: "2024-02-05",
-        amountDue: 25000,
-        currency: "USD",
-        status: "due-today",
-        priority: "high",
-        description: "First milestone payment for pipeline installation",
-        responsiblePerson: "Mike Johnson",
-        lastUpdate: "2024-01-25",
-        serviceDescription: "Underground pipeline installation - Phase 1",
-        projectReference: "PROJ-2024-001",
-        paymentTerms: "15",
-      },
-      {
-        id: "2",
-        contractServiceId: "cs2",
-        contractService: mockContractServices[1],
-        lastServiceDate: "2024-02-28",
-        nextPaymentDate: "2024-03-15",
-        amountDue: 42000,
-        currency: "USD",
-        status: "overdue",
-        priority: "high",
-        description: "Final payment for sewer maintenance project",
-        responsiblePerson: "Sarah Wilson",
-        lastUpdate: "2024-03-01",
-        serviceDescription: "Sewer system maintenance - Complete",
-        projectReference: "PROJ-2024-002",
-        paymentTerms: "15",
-      },
-      {
-        id: "3",
-        contractServiceId: "cs3",
-        contractService: mockContractServices[2],
-        lastServiceDate: "2024-01-25",
-        nextPaymentDate: "2024-02-10",
-        amountDue: 19500,
-        currency: "USD",
-        status: "pending",
-        priority: "medium",
-        description: "Progress payment for drainage upgrade",
-        responsiblePerson: "David Brown",
-        lastUpdate: "2024-01-30",
-        serviceDescription: "Drainage system upgrade - Phase 1",
-        projectReference: "PROJ-2024-003",
-        paymentTerms: "15",
-      },
-    ];
-
-    setAlerts(mockAlerts);
-    setFilteredAlerts(mockAlerts);
-    setLoading(false);
+    fetchAlerts();
   }, []);
 
   useEffect(() => {
@@ -311,18 +162,41 @@ const ContractedServicePaymentAlert: React.FC = () => {
     }
   };
 
-  const handleMarkAsPaid = (alertId: string) => {
-    setAlerts((prev) =>
-      prev.map((alert) =>
-        alert.id === alertId
-          ? {
-              ...alert,
-              status: "paid" as const,
-              lastUpdate: new Date().toISOString().split("T")[0],
-            }
-          : alert
-      )
-    );
+  const handleMarkAsPaid = async (alertId: string) => {
+    try {
+      await contractedServicePaymentService.markPaymentAsPaid(alertId);
+      setAlerts((prev) =>
+        prev.map((alert) =>
+          alert.id === alertId
+            ? {
+                ...alert,
+                status: "paid" as const,
+                lastUpdate: new Date().toISOString().split("T")[0],
+              }
+            : alert
+        )
+      );
+      setFilteredAlerts((prev) =>
+        prev.map((alert) =>
+          alert.id === alertId
+            ? {
+                ...alert,
+                status: "paid" as const,
+                lastUpdate: new Date().toISOString().split("T")[0],
+              }
+            : alert
+        )
+      );
+      if (selectedAlert && selectedAlert.id === alertId) {
+        setSelectedAlert({
+          ...selectedAlert,
+          status: "paid" as const,
+          lastUpdate: new Date().toISOString().split("T")[0],
+        });
+      }
+    } catch (error) {
+      console.error("Error marking payment as paid:", error);
+    }
   };
 
   const handleCloseModal = () => {

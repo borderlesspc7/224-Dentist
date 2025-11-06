@@ -11,6 +11,8 @@ import {
   CheckCircleIcon,
   XCircleIcon,
 } from "lucide-react";
+import { vehicleService } from "../../../../services/vehicleService";
+import type { Vehicle } from "../../../../types/vehicle";
 
 interface VehicleAlert {
   id: string;
@@ -44,59 +46,187 @@ const VehicleAlert: React.FC = () => {
     "all" | "low" | "medium" | "high"
   >("all");
 
-  // Mock data - replace with real data from Firestore
-  useEffect(() => {
-    const mockAlerts: VehicleAlert[] = [
-      {
-        id: "1",
-        vehicleId: "v1",
-        vehicleName: "Ford Transit",
-        licensePlate: "ABC-1234",
-        alertType: "date",
-        currentValue: 0,
-        limitValue: 0,
-        dueDate: "2024-01-15",
-        status: "overdue",
-        priority: "high",
-        description: "Oil change due",
-        lastMaintenance: "2023-10-15",
-        nextMaintenance: "2024-01-15",
-      },
-      {
-        id: "2",
-        vehicleId: "v2",
-        vehicleName: "Chevrolet Silverado",
-        licensePlate: "XYZ-5678",
-        alertType: "mileage",
-        currentValue: 45000,
-        limitValue: 50000,
-        dueDate: "2024-02-01",
-        status: "pending",
-        priority: "medium",
-        description: "Engine service due",
-        lastMaintenance: "2023-08-01",
-        nextMaintenance: "2024-02-01",
-      },
-      {
-        id: "3",
-        vehicleId: "v3",
-        vehicleName: "Toyota Hilux",
-        licensePlate: "DEF-9012",
-        alertType: "hours",
-        currentValue: 180,
-        limitValue: 200,
-        dueDate: "2024-01-20",
-        status: "pending",
-        priority: "low",
-        description: "Hydraulic system check",
-        lastMaintenance: "2023-11-20",
-        nextMaintenance: "2024-01-20",
-      },
-    ];
+  // Função para calcular prioridade baseada na proximidade da data
+  const calculatePriority = (daysUntilDue: number): "low" | "medium" | "high" => {
+    if (daysUntilDue < 0) return "high"; // Overdue
+    if (daysUntilDue <= 7) return "high"; // Urgente
+    if (daysUntilDue <= 30) return "medium"; // Próximo
+    return "low"; // Distante
+  };
 
-    setAlerts(mockAlerts);
-    setFilteredAlerts(mockAlerts);
-    setLoading(false);
+  // Função para calcular status baseado na data
+  const calculateStatus = (dueDate: Date): "pending" | "overdue" | "completed" => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const due = new Date(dueDate);
+    due.setHours(0, 0, 0, 0);
+    
+    if (due < today) return "overdue";
+    return "pending";
+  };
+
+  // Função para calcular dias até a data de vencimento
+  const daysUntilDue = (dueDate: Date): number => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const due = new Date(dueDate);
+    due.setHours(0, 0, 0, 0);
+    const diffTime = due.getTime() - today.getTime();
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  };
+
+  // Função para gerar alertas a partir dos veículos
+  const generateAlertsFromVehicles = (vehicles: Vehicle[]): VehicleAlert[] => {
+    const alerts: VehicleAlert[] = [];
+    let alertIdCounter = 1;
+
+    vehicles.forEach((vehicle) => {
+      if (!vehicle.id) return;
+
+      const vehicleName = `${vehicle.make} ${vehicle.model}`;
+      const lastMaintenance = vehicle.lastMaintenanceDate || "";
+
+      // Alert de manutenção
+      if (vehicle.nextMaintenanceDate) {
+        const maintenanceDate = new Date(vehicle.nextMaintenanceDate);
+        const daysUntil = daysUntilDue(maintenanceDate);
+        const status = calculateStatus(maintenanceDate);
+        const priority = calculatePriority(daysUntil);
+
+        alerts.push({
+          id: `maintenance-${vehicle.id}-${alertIdCounter++}`,
+          vehicleId: vehicle.id,
+          vehicleName,
+          licensePlate: vehicle.licensePlate,
+          alertType: "date",
+          currentValue: 0,
+          limitValue: 0,
+          dueDate: vehicle.nextMaintenanceDate,
+          status,
+          priority,
+          description: "Manutenção programada",
+          lastMaintenance,
+          nextMaintenance: vehicle.nextMaintenanceDate,
+        });
+      }
+
+      // Alert de renovação de placa
+      if (vehicle.licensePlateRenewalDate) {
+        const renewalDate = new Date(vehicle.licensePlateRenewalDate);
+        const daysUntil = daysUntilDue(renewalDate);
+        const status = calculateStatus(renewalDate);
+        const priority = calculatePriority(daysUntil);
+
+        alerts.push({
+          id: `plate-${vehicle.id}-${alertIdCounter++}`,
+          vehicleId: vehicle.id,
+          vehicleName,
+          licensePlate: vehicle.licensePlate,
+          alertType: "date",
+          currentValue: 0,
+          limitValue: 0,
+          dueDate: vehicle.licensePlateRenewalDate,
+          status,
+          priority,
+          description: "Renovação de placa",
+          lastMaintenance,
+          nextMaintenance: vehicle.nextMaintenanceDate || "",
+        });
+      }
+
+      // Alert de renovação DOT
+      if (vehicle.dotRenewalDate) {
+        const renewalDate = new Date(vehicle.dotRenewalDate);
+        const daysUntil = daysUntilDue(renewalDate);
+        const status = calculateStatus(renewalDate);
+        const priority = calculatePriority(daysUntil);
+
+        alerts.push({
+          id: `dot-${vehicle.id}-${alertIdCounter++}`,
+          vehicleId: vehicle.id,
+          vehicleName,
+          licensePlate: vehicle.licensePlate,
+          alertType: "date",
+          currentValue: 0,
+          limitValue: 0,
+          dueDate: vehicle.dotRenewalDate,
+          status,
+          priority,
+          description: "Renovação DOT",
+          lastMaintenance,
+          nextMaintenance: vehicle.nextMaintenanceDate || "",
+        });
+      }
+
+      // Alert de expiração do seguro
+      if (vehicle.insuranceExpiry) {
+        const expiryDate = new Date(vehicle.insuranceExpiry);
+        const daysUntil = daysUntilDue(expiryDate);
+        const status = calculateStatus(expiryDate);
+        const priority = calculatePriority(daysUntil);
+
+        alerts.push({
+          id: `insurance-${vehicle.id}-${alertIdCounter++}`,
+          vehicleId: vehicle.id,
+          vehicleName,
+          licensePlate: vehicle.licensePlate,
+          alertType: "date",
+          currentValue: 0,
+          limitValue: 0,
+          dueDate: vehicle.insuranceExpiry,
+          status,
+          priority,
+          description: "Expiração do seguro",
+          lastMaintenance,
+          nextMaintenance: vehicle.nextMaintenanceDate || "",
+        });
+      }
+
+      // Alert de expiração do registro
+      if (vehicle.registrationExpiry) {
+        const expiryDate = new Date(vehicle.registrationExpiry);
+        const daysUntil = daysUntilDue(expiryDate);
+        const status = calculateStatus(expiryDate);
+        const priority = calculatePriority(daysUntil);
+
+        alerts.push({
+          id: `registration-${vehicle.id}-${alertIdCounter++}`,
+          vehicleId: vehicle.id,
+          vehicleName,
+          licensePlate: vehicle.licensePlate,
+          alertType: "date",
+          currentValue: 0,
+          limitValue: 0,
+          dueDate: vehicle.registrationExpiry,
+          status,
+          priority,
+          description: "Expiração do registro",
+          lastMaintenance,
+          nextMaintenance: vehicle.nextMaintenanceDate || "",
+        });
+      }
+    });
+
+    return alerts;
+  };
+
+  // Buscar dados reais dos veículos
+  useEffect(() => {
+    const fetchVehicleAlerts = async () => {
+      try {
+        setLoading(true);
+        const vehicles = await vehicleService.getAllVehicles();
+        const vehicleAlerts = generateAlertsFromVehicles(vehicles);
+        setAlerts(vehicleAlerts);
+        setFilteredAlerts(vehicleAlerts);
+      } catch (error) {
+        console.error("Erro ao buscar alertas de veículos:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchVehicleAlerts();
   }, []);
 
   // Filter alerts based on search and filters
@@ -183,19 +313,50 @@ const VehicleAlert: React.FC = () => {
     }
   };
 
-  const handleMarkAsCompleted = (alertId: string) => {
-    setAlerts((prev) =>
-      prev.map((alert) =>
-        alert.id === alertId
-          ? { ...alert, status: "completed" as const }
-          : alert
-      )
-    );
+  const handleMarkAsCompleted = async (alertId: string) => {
+    try {
+      const alert = alerts.find((a) => a.id === alertId);
+      if (!alert || !alert.vehicleId) return;
+
+      // Dependendo do tipo de alerta, atualizamos o veículo correspondente
+      if (alert.id.startsWith("maintenance-")) {
+        // Atualiza a data da última manutenção para hoje
+        const today = new Date().toISOString().split("T")[0];
+        await vehicleService.updateVehicle(alert.vehicleId, {
+          lastMaintenanceDate: today,
+        });
+      } else if (alert.id.startsWith("plate-")) {
+        // Poderia adicionar uma lógica para atualizar a data de renovação
+        // Por enquanto, apenas removemos o alerta da lista
+      } else if (alert.id.startsWith("dot-")) {
+        // Poderia adicionar uma lógica para atualizar a data de renovação DOT
+      } else if (alert.id.startsWith("insurance-")) {
+        // Poderia adicionar uma lógica para atualizar o seguro
+      } else if (alert.id.startsWith("registration-")) {
+        // Poderia adicionar uma lógica para atualizar o registro
+      }
+
+      // Remove o alerta da lista
+      setAlerts((prev) => prev.filter((a) => a.id !== alertId));
+      setFilteredAlerts((prev) => prev.filter((a) => a.id !== alertId));
+
+      // Recarrega os alertas para atualizar a lista
+      const vehicles = await vehicleService.getAllVehicles();
+      const vehicleAlerts = generateAlertsFromVehicles(vehicles);
+      setAlerts(vehicleAlerts);
+    } catch (error) {
+      console.error("Erro ao marcar alerta como concluído:", error);
+    }
   };
 
   const handleViewDetails = (alertId: string) => {
-    // Navigate to vehicle details or maintenance history
-    console.log("View details for alert:", alertId);
+    const alert = alerts.find((a) => a.id === alertId);
+    if (alert && alert.vehicleId) {
+      // Navegar para detalhes do veículo quando a rota estiver disponível
+      // Por enquanto, apenas log
+      console.log("View details for vehicle:", alert.vehicleId);
+      // navigate(`/admin/vehicles/${alert.vehicleId}`);
+    }
   };
 
   if (loading) {

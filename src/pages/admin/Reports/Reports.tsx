@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./Reports.css";
 import {
   BarChart3Icon,
@@ -16,6 +16,7 @@ import {
   XIcon,
   DownloadIcon,
 } from "lucide-react";
+import { useReportsData } from "../../../hooks/useReportsData";
 
 interface ReportCard {
   id: string;
@@ -47,8 +48,15 @@ const Reports: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedReport, setSelectedReport] = useState<ReportCard | null>(null);
   const [reportData, setReportData] = useState<ReportData | null>(null);
+  const [reportCards, setReportCards] = useState<ReportCard[]>([]);
+  const [loadingMetrics, setLoadingMetrics] = useState(false);
+  const [loadingReportData, setLoadingReportData] = useState(false);
 
-  const reportCards: ReportCard[] = [
+  const { generateReportData, getReportMetrics, loading, error } =
+    useReportsData();
+
+  // Definir estrutura base dos cards de relatório
+  const baseReportCards: Omit<ReportCard, "metrics">[] = [
     {
       id: "client-payments",
       title: "Client Payments Report",
@@ -57,10 +65,6 @@ const Reports: React.FC = () => {
       category: "financial",
       icon: <DollarSignIcon />,
       color: "#10b981",
-      metrics: [
-        { label: "Total Received", value: "$45,230" },
-        { label: "Pending", value: "$12,500" },
-      ],
     },
     {
       id: "subcontractor-payments",
@@ -70,10 +74,6 @@ const Reports: React.FC = () => {
       category: "financial",
       icon: <CreditCardIcon />,
       color: "#f59e0b",
-      metrics: [
-        { label: "Total Paid", value: "$23,400" },
-        { label: "Due", value: "$8,900" },
-      ],
     },
     {
       id: "project-costs",
@@ -83,10 +83,6 @@ const Reports: React.FC = () => {
       category: "financial",
       icon: <TrendingUpIcon />,
       color: "#3b82f6",
-      metrics: [
-        { label: "Total Budget", value: "$120,000" },
-        { label: "Spent", value: "$87,450" },
-      ],
     },
     {
       id: "vehicle-maintenance",
@@ -96,10 +92,6 @@ const Reports: React.FC = () => {
       category: "operational",
       icon: <TruckIcon />,
       color: "#8b5cf6",
-      metrics: [
-        { label: "Active Vehicles", value: "12" },
-        { label: "Maintenance Due", value: "3" },
-      ],
     },
     {
       id: "contracted-services",
@@ -109,10 +101,6 @@ const Reports: React.FC = () => {
       category: "operational",
       icon: <ClipboardListIcon />,
       color: "#06b6d4",
-      metrics: [
-        { label: "Active Services", value: "8" },
-        { label: "Completed", value: "15" },
-      ],
     },
     {
       id: "client-overview",
@@ -122,10 +110,6 @@ const Reports: React.FC = () => {
       category: "management",
       icon: <UsersIcon />,
       color: "#ec4899",
-      metrics: [
-        { label: "Total Clients", value: "34" },
-        { label: "Active Projects", value: "12" },
-      ],
     },
     {
       id: "expense-breakdown",
@@ -135,10 +119,6 @@ const Reports: React.FC = () => {
       category: "financial",
       icon: <BarChart3Icon />,
       color: "#ef4444",
-      metrics: [
-        { label: "Total Expenses", value: "$67,890" },
-        { label: "Categories", value: "8" },
-      ],
     },
     {
       id: "service-pricing",
@@ -148,10 +128,6 @@ const Reports: React.FC = () => {
       category: "financial",
       icon: <FileTextIcon />,
       color: "#14b8a6",
-      metrics: [
-        { label: "Services", value: "24" },
-        { label: "Avg. Margin", value: "32%" },
-      ],
     },
     {
       id: "alerts-summary",
@@ -161,10 +137,6 @@ const Reports: React.FC = () => {
       category: "management",
       icon: <AlertCircleIcon />,
       color: "#f97316",
-      metrics: [
-        { label: "Active Alerts", value: "18" },
-        { label: "Critical", value: "5" },
-      ],
     },
     {
       id: "project-completion",
@@ -174,10 +146,6 @@ const Reports: React.FC = () => {
       category: "operational",
       icon: <CheckCircleIcon />,
       color: "#84cc16",
-      metrics: [
-        { label: "On Schedule", value: "9" },
-        { label: "Delayed", value: "3" },
-      ],
     },
     {
       id: "cash-flow",
@@ -187,10 +155,6 @@ const Reports: React.FC = () => {
       category: "financial",
       icon: <TrendingUpIcon />,
       color: "#6366f1",
-      metrics: [
-        { label: "Net Income", value: "$18,340" },
-        { label: "Change", value: "+12%" },
-      ],
     },
     {
       id: "employee-hours",
@@ -200,12 +164,65 @@ const Reports: React.FC = () => {
       category: "management",
       icon: <CalendarIcon />,
       color: "#a855f7",
-      metrics: [
-        { label: "Total Hours", value: "1,240" },
-        { label: "Employees", value: "15" },
-      ],
     },
   ];
+
+  // Calcular datas do período selecionado
+  const getPeriodDates = (): { startDate?: Date; endDate?: Date } => {
+    const endDate = new Date();
+    endDate.setHours(23, 59, 59, 999);
+    let startDate = new Date();
+
+    if (selectedPeriod === "7") {
+      startDate.setDate(endDate.getDate() - 7);
+    } else if (selectedPeriod === "30") {
+      startDate.setDate(endDate.getDate() - 30);
+    } else if (selectedPeriod === "90") {
+      startDate.setDate(endDate.getDate() - 90);
+    } else if (selectedPeriod === "custom") {
+      if (customStartDate && customEndDate) {
+        startDate = new Date(customStartDate);
+        endDate.setTime(new Date(customEndDate).getTime());
+        endDate.setHours(23, 59, 59, 999);
+      } else {
+        return {};
+      }
+    }
+
+    startDate.setHours(0, 0, 0, 0);
+    return { startDate, endDate };
+  };
+
+  // Carregar métricas dos relatórios
+  useEffect(() => {
+    const loadMetrics = async () => {
+      setLoadingMetrics(true);
+      try {
+        const { startDate, endDate } = getPeriodDates();
+        const cardsWithMetrics = await Promise.all(
+          baseReportCards.map(async (card) => {
+            const metrics = await getReportMetrics(
+              card.id,
+              startDate,
+              endDate
+            );
+            return {
+              ...card,
+              metrics: metrics.length > 0 ? metrics : undefined,
+            };
+          })
+        );
+        setReportCards(cardsWithMetrics);
+      } catch (err) {
+        console.error("Error loading report metrics:", err);
+      } finally {
+        setLoadingMetrics(false);
+      }
+    };
+
+    loadMetrics();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedPeriod, customStartDate, customEndDate]);
 
   const filteredReports = reportCards.filter((report) => {
     if (selectedCategory === "all") return true;
@@ -229,502 +246,25 @@ const Reports: React.FC = () => {
     }
   };
 
-  const generateReportData = (reportId: string): ReportData => {
-    switch (reportId) {
-      case "client-payments":
-        return {
-          columns: [
-            "Client Name",
-            "Invoice Number",
-            "Amount",
-            "Due Date",
-            "Status",
-            "Payment Date",
-          ],
-          rows: [
-            [
-              "João Silva",
-              "INV-2024-001",
-              "$2,500",
-              "2024-01-15",
-              "Overdue",
-              "-",
-            ],
-            [
-              "Maria Oliveira",
-              "INV-2024-002",
-              "$1,500",
-              "2024-02-20",
-              "Pending",
-              "-",
-            ],
-            [
-              "Pedro Santos",
-              "INV-2024-003",
-              "$3,000",
-              "2024-03-10",
-              "Paid",
-              "2024-03-08",
-            ],
-            [
-              "Ana Costa",
-              "INV-2024-004",
-              "$4,200",
-              "2024-03-15",
-              "Paid",
-              "2024-03-12",
-            ],
-            [
-              "Carlos Lima",
-              "INV-2024-005",
-              "$1,800",
-              "2024-03-20",
-              "Pending",
-              "-",
-            ],
-          ],
-        };
-
-      case "subcontractor-payments":
-        return {
-          columns: [
-            "Company Name",
-            "Contact Person",
-            "Service",
-            "Amount Due",
-            "Payment Date",
-            "Status",
-          ],
-          rows: [
-            [
-              "John Doe Services LLC",
-              "John Doe",
-              "Excavation",
-              "$3,200",
-              "2024-01-25",
-              "Due Today",
-            ],
-            [
-              "Build&Co Inc",
-              "Mary Smith",
-              "Concrete",
-              "$5,800",
-              "2024-01-14",
-              "Overdue",
-            ],
-            [
-              "RoadWorks LLC",
-              "Carlos Lima",
-              "Road Repair",
-              "$900",
-              "2024-01-27",
-              "Pending",
-            ],
-            [
-              "Pipeline Masters",
-              "Robert Johnson",
-              "Pipeline Installation",
-              "$12,500",
-              "2024-02-01",
-              "Pending",
-            ],
-            [
-              "Drainage Experts",
-              "Sarah Williams",
-              "Drainage Work",
-              "$4,300",
-              "2024-01-30",
-              "Due Today",
-            ],
-          ],
-        };
-
-      case "project-costs":
-        return {
-          columns: [
-            "Project Name",
-            "Client",
-            "Budget",
-            "Spent",
-            "Remaining",
-            "Status",
-          ],
-          rows: [
-            [
-              "Underground Pipeline",
-              "City Water Dept",
-              "$150,000",
-              "$120,000",
-              "$30,000",
-              "In Progress",
-            ],
-            [
-              "Sewer Maintenance",
-              "Metro Utilities",
-              "$45,000",
-              "$42,000",
-              "$3,000",
-              "Completed",
-            ],
-            [
-              "Drainage Upgrade",
-              "County Public Works",
-              "$85,000",
-              "$78,000",
-              "$7,000",
-              "In Progress",
-            ],
-            [
-              "Road Construction",
-              "State Highway",
-              "$200,000",
-              "$145,000",
-              "$55,000",
-              "In Progress",
-            ],
-            [
-              "Water Treatment",
-              "City Infrastructure",
-              "$95,000",
-              "$95,000",
-              "$0",
-              "Completed",
-            ],
-          ],
-        };
-
-      case "vehicle-maintenance":
-        return {
-          columns: [
-            "Vehicle",
-            "License Plate",
-            "Last Maintenance",
-            "Next Maintenance",
-            "Type",
-            "Cost",
-          ],
-          rows: [
-            [
-              "Ford F-150",
-              "ABC-1234",
-              "2024-01-05",
-              "2024-04-05",
-              "Oil Change",
-              "$85",
-            ],
-            [
-              "Chevrolet Silverado",
-              "XYZ-5678",
-              "2024-01-15",
-              "2024-02-15",
-              "Tire Rotation",
-              "$120",
-            ],
-            [
-              "Toyota Tacoma",
-              "DEF-9012",
-              "2024-01-20",
-              "2024-03-20",
-              "Brake Service",
-              "$250",
-            ],
-            [
-              "Ram 2500",
-              "GHI-3456",
-              "2024-01-10",
-              "2024-04-10",
-              "Oil Change",
-              "$95",
-            ],
-            [
-              "GMC Sierra",
-              "JKL-7890",
-              "2024-01-25",
-              "2024-03-25",
-              "Inspection",
-              "$75",
-            ],
-          ],
-        };
-
-      case "contracted-services":
-        return {
-          columns: [
-            "Service Name",
-            "Client",
-            "Start Date",
-            "End Date",
-            "Status",
-            "Budget",
-            "Spent",
-          ],
-          rows: [
-            [
-              "Pipeline Installation",
-              "City Water Dept",
-              "2024-01-15",
-              "2024-06-15",
-              "In Progress",
-              "$150,000",
-              "$120,000",
-            ],
-            [
-              "Sewer Maintenance",
-              "Metro Utilities",
-              "2024-02-01",
-              "2024-03-01",
-              "Completed",
-              "$45,000",
-              "$42,000",
-            ],
-            [
-              "Drainage Upgrade",
-              "County Public Works",
-              "2024-01-10",
-              "2024-04-10",
-              "In Progress",
-              "$85,000",
-              "$78,000",
-            ],
-            [
-              "Water Line Repair",
-              "City Services",
-              "2024-02-15",
-              "2024-05-15",
-              "In Progress",
-              "$68,000",
-              "$45,000",
-            ],
-            [
-              "Road Paving",
-              "State Highway",
-              "2024-01-20",
-              "2024-03-20",
-              "Completed",
-              "$125,000",
-              "$122,000",
-            ],
-          ],
-        };
-
-      case "client-overview":
-        return {
-          columns: [
-            "Client Name",
-            "Total Projects",
-            "Active Projects",
-            "Total Revenue",
-            "Payment Status",
-          ],
-          rows: [
-            ["City Water Department", "12", "3", "$450,000", "Good"],
-            ["Metro Utilities", "8", "2", "$280,000", "Excellent"],
-            ["County Public Works", "15", "5", "$620,000", "Good"],
-            ["State Highway Authority", "6", "1", "$195,000", "Fair"],
-            ["City Infrastructure", "9", "4", "$340,000", "Good"],
-          ],
-        };
-
-      case "expense-breakdown":
-        return {
-          columns: ["Category", "Amount", "Percentage", "Count", "Average"],
-          rows: [
-            ["Labor", "$34,500", "38%", "156", "$221"],
-            ["Materials", "$28,900", "32%", "89", "$325"],
-            ["Equipment", "$15,600", "17%", "45", "$347"],
-            ["Transportation", "$7,800", "9%", "67", "$116"],
-            ["Other", "$3,090", "4%", "28", "$110"],
-          ],
-        };
-
-      case "service-pricing":
-        return {
-          columns: ["Service", "Client", "Price", "Cost", "Margin", "Status"],
-          rows: [
-            [
-              "Pipeline Installation",
-              "City Water",
-              "$12,500",
-              "$8,900",
-              "29%",
-              "Active",
-            ],
-            [
-              "Drainage Work",
-              "County Public",
-              "$8,200",
-              "$5,400",
-              "34%",
-              "Active",
-            ],
-            [
-              "Road Repair",
-              "State Highway",
-              "$15,000",
-              "$11,200",
-              "25%",
-              "Active",
-            ],
-            [
-              "Excavation",
-              "Metro Utilities",
-              "$6,800",
-              "$4,500",
-              "34%",
-              "Active",
-            ],
-            [
-              "Concrete Work",
-              "City Services",
-              "$9,500",
-              "$6,800",
-              "28%",
-              "Completed",
-            ],
-          ],
-        };
-
-      case "alerts-summary":
-        return {
-          columns: ["Alert Type", "Count", "Critical", "High", "Medium", "Low"],
-          rows: [
-            ["Payment Due", "12", "3", "5", "3", "1"],
-            ["Vehicle Maintenance", "8", "2", "4", "2", "0"],
-            ["Project Deadline", "15", "5", "6", "3", "1"],
-            ["Contract Expiry", "6", "1", "2", "2", "1"],
-            ["Insurance Renewal", "4", "2", "1", "1", "0"],
-          ],
-        };
-
-      case "project-completion":
-        return {
-          columns: [
-            "Project",
-            "Progress",
-            "Start Date",
-            "End Date",
-            "Days Remaining",
-            "Status",
-          ],
-          rows: [
-            [
-              "Underground Pipeline",
-              "80%",
-              "2024-01-15",
-              "2024-06-15",
-              "45",
-              "On Track",
-            ],
-            [
-              "Drainage Upgrade",
-              "92%",
-              "2024-01-10",
-              "2024-04-10",
-              "15",
-              "On Track",
-            ],
-            [
-              "Road Construction",
-              "73%",
-              "2024-02-01",
-              "2024-07-01",
-              "78",
-              "At Risk",
-            ],
-            [
-              "Water Treatment",
-              "100%",
-              "2023-12-01",
-              "2024-03-01",
-              "0",
-              "Completed",
-            ],
-            ["Sewer Line", "65%", "2024-01-20", "2024-05-20", "52", "Delayed"],
-          ],
-        };
-
-      case "cash-flow":
-        return {
-          columns: ["Month", "Income", "Expenses", "Net", "Change", "Balance"],
-          rows: [
-            [
-              "January 2024",
-              "$145,000",
-              "$98,500",
-              "$46,500",
-              "+12%",
-              "$246,500",
-            ],
-            [
-              "February 2024",
-              "$168,000",
-              "$112,000",
-              "$56,000",
-              "+20%",
-              "$302,500",
-            ],
-            [
-              "March 2024",
-              "$192,000",
-              "$125,000",
-              "$67,000",
-              "+20%",
-              "$369,500",
-            ],
-            [
-              "December 2023",
-              "$132,000",
-              "$95,000",
-              "$37,000",
-              "+8%",
-              "$200,000",
-            ],
-            [
-              "November 2023",
-              "$128,000",
-              "$94,000",
-              "$34,000",
-              "+5%",
-              "$163,000",
-            ],
-          ],
-        };
-
-      case "employee-hours":
-        return {
-          columns: [
-            "Employee",
-            "Regular Hours",
-            "Overtime",
-            "Total Hours",
-            "Hourly Rate",
-            "Total Pay",
-          ],
-          rows: [
-            ["John Smith", "160", "12", "172", "$25", "$4,300"],
-            ["Maria Garcia", "160", "8", "168", "$28", "$4,704"],
-            ["David Johnson", "160", "15", "175", "$30", "$5,475"],
-            ["Sarah Williams", "160", "5", "165", "$26", "$4,355"],
-            ["Robert Brown", "160", "10", "170", "$27", "$4,725"],
-          ],
-        };
-
-      default:
-        return {
-          columns: ["Item", "Value", "Status"],
-          rows: [
-            ["Sample Data 1", "Value 1", "Active"],
-            ["Sample Data 2", "Value 2", "Completed"],
-            ["Sample Data 3", "Value 3", "Pending"],
-          ],
-        };
-    }
-  };
-
-  const handleViewDetails = (report: ReportCard) => {
+  const handleViewDetails = async (report: ReportCard) => {
     setSelectedReport(report);
-    setReportData(generateReportData(report.id));
     setIsModalOpen(true);
+    setReportData(null);
+    setLoadingReportData(true);
+    
+    try {
+      const { startDate, endDate } = getPeriodDates();
+      const data = await generateReportData(report.id, startDate, endDate);
+      setReportData(data);
+    } catch (err) {
+      console.error("Error loading report data:", err);
+      setReportData({
+        columns: ["Error"],
+        rows: [["Failed to load report data"]],
+      });
+    } finally {
+      setLoadingReportData(false);
+    }
   };
 
   const handleCloseModal = () => {
@@ -924,7 +464,7 @@ const Reports: React.FC = () => {
       )}
 
       {/* Report Details Modal */}
-      {isModalOpen && selectedReport && reportData && (
+      {isModalOpen && selectedReport && (
         <div className="modal-overlay" onClick={handleCloseModal}>
           <div className="modal-container" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
@@ -946,26 +486,47 @@ const Reports: React.FC = () => {
             </div>
 
             <div className="modal-body">
-              <div className="table-container">
-                <table className="report-table">
-                  <thead>
-                    <tr>
-                      {reportData.columns.map((column, index) => (
-                        <th key={index}>{column}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {reportData.rows.map((row, rowIndex) => (
-                      <tr key={rowIndex}>
-                        {row.map((cell, cellIndex) => (
-                          <td key={cellIndex}>{cell}</td>
+              {loadingReportData ? (
+                <div style={{ textAlign: "center", padding: "2rem" }}>
+                  <p>Carregando dados do relatório...</p>
+                </div>
+              ) : reportData ? (
+                <div className="table-container">
+                  <table className="report-table">
+                    <thead>
+                      <tr>
+                        {reportData.columns.map((column, index) => (
+                          <th key={index}>{column}</th>
                         ))}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {reportData.rows.length > 0 ? (
+                        reportData.rows.map((row, rowIndex) => (
+                          <tr key={rowIndex}>
+                            {row.map((cell, cellIndex) => (
+                              <td key={cellIndex}>{cell}</td>
+                            ))}
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td
+                            colSpan={reportData.columns.length}
+                            style={{ textAlign: "center", padding: "2rem" }}
+                          >
+                            Nenhum dado disponível para o período selecionado
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div style={{ textAlign: "center", padding: "2rem" }}>
+                  <p>Erro ao carregar dados do relatório</p>
+                </div>
+              )}
             </div>
 
             <div className="modal-footer">
@@ -975,10 +536,12 @@ const Reports: React.FC = () => {
               >
                 Close
               </button>
-              <button className="modal-btn primary" onClick={handleExportCSV}>
-                <DownloadIcon />
-                Export CSV
-              </button>
+              {reportData && (
+                <button className="modal-btn primary" onClick={handleExportCSV}>
+                  <DownloadIcon />
+                  Export CSV
+                </button>
+              )}
             </div>
           </div>
         </div>

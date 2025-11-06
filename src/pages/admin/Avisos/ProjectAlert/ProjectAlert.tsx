@@ -7,22 +7,10 @@ import {
   ClockIcon,
   SearchIcon,
 } from "lucide-react";
+import { projectService, type ProjectAlertData } from "../../../../services/projectService";
 
-interface ProjectAlert {
-  id: string;
-  projectId: string;
-  projectName: string;
-  clientName: string;
-  projectType: string;
-  startDate: string;
-  plannedEndDate: string;
-  actualProgress: number;
-  status: "on-track" | "at-risk" | "delayed" | "completed";
-  priority: "low" | "medium" | "high";
-  description: string;
-  responsiblePerson: string;
-  lastUpdate: string;
-}
+// Usando ProjectAlertData do serviço
+type ProjectAlert = ProjectAlertData;
 
 const ProjectAlert: React.FC = () => {
   const navigate = useNavigate();
@@ -43,57 +31,20 @@ const ProjectAlert: React.FC = () => {
   const [newProgress, setNewProgress] = useState(0);
 
   useEffect(() => {
-    const mockAlerts: ProjectAlert[] = [
-      {
-        id: "1",
-        projectId: "p1",
-        projectName: "Underground Pipeline Installation",
-        clientName: "City Water Department",
-        projectType: "Infrastructure",
-        startDate: "2023-11-01",
-        plannedEndDate: "2024-02-15",
-        actualProgress: 75,
-        status: "on-track",
-        priority: "high",
-        description: "Main water pipeline installation project",
-        responsiblePerson: "John Smith",
-        lastUpdate: "2024-01-10",
-      },
-      {
-        id: "2",
-        projectId: "p2",
-        projectName: "Sewer System Maintenance",
-        clientName: "Metro Utilities",
-        projectType: "Maintenance",
-        startDate: "2023-12-01",
-        plannedEndDate: "2024-01-20",
-        actualProgress: 45,
-        status: "at-risk",
-        priority: "medium",
-        description: "Quarterly sewer system maintenance",
-        responsiblePerson: "Maria Garcia",
-        lastUpdate: "2024-01-08",
-      },
-      {
-        id: "3",
-        projectId: "p3",
-        projectName: "Drainage System Upgrade",
-        clientName: "County Public Works",
-        projectType: "Upgrade",
-        startDate: "2023-10-15",
-        plannedEndDate: "2024-01-10",
-        actualProgress: 90,
-        status: "delayed",
-        priority: "high",
-        description: "Storm drainage system upgrade",
-        responsiblePerson: "David Johnson",
-        lastUpdate: "2024-01-05",
-      },
-    ];
+    const fetchAlerts = async () => {
+      try {
+        setLoading(true);
+        const projectAlerts = await projectService.getAllProjectAlerts();
+        setAlerts(projectAlerts);
+        setFilteredAlerts(projectAlerts);
+      } catch (error) {
+        console.error("Error fetching project alerts:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    setAlerts(mockAlerts);
-    setFilteredAlerts(mockAlerts);
-    setLoading(false);
+    fetchAlerts();
   }, []);
 
   useEffect(() => {
@@ -195,38 +146,47 @@ const ProjectAlert: React.FC = () => {
     setIsModalOpen(false);
   };
 
-  const handleSaveProgress = () => {
+  const handleSaveProgress = async () => {
     if (selectedAlert) {
-      setAlerts((prev) =>
-        prev.map((alert) =>
-          alert.id === selectedAlert.id
-            ? {
-                ...alert,
-                actualProgress: newProgress,
-                lastUpdate: new Date().toISOString().split("T")[0],
-              }
-            : alert
-        )
-      );
-      setEditingProgress(false);
+      try {
+        await projectService.updateProjectProgress(
+          selectedAlert.projectId,
+          newProgress
+        );
+        
+        // Recarregar os alertas para refletir o novo status calculado
+        const projectAlerts = await projectService.getAllProjectAlerts();
+        setAlerts(projectAlerts);
+        
+        // Atualizar o alerta selecionado
+        const updatedAlert = projectAlerts.find(
+          (alert) => alert.id === selectedAlert.id
+        );
+        if (updatedAlert) {
+          setSelectedAlert(updatedAlert);
+        }
+        
+        setEditingProgress(false);
+      } catch (error) {
+        console.error("Error saving progress:", error);
+      }
     }
   };
 
-  const handleMarkAsCompleted = () => {
+  const handleMarkAsCompleted = async () => {
     if (selectedAlert) {
-      setAlerts((prev) =>
-        prev.map((alert) =>
-          alert.id === selectedAlert.id
-            ? {
-                ...alert,
-                status: "completed" as const,
-                actualProgress: 100,
-                lastUpdate: new Date().toISOString().split("T")[0],
-              }
-            : alert
-        )
-      );
-      handleCloseModal();
+      try {
+        await projectService.markProjectAsCompleted(selectedAlert.projectId);
+        
+        // Recarregar os alertas para refletir o novo status
+        const projectAlerts = await projectService.getAllProjectAlerts();
+        setAlerts(projectAlerts);
+        setFilteredAlerts(projectAlerts);
+        
+        handleCloseModal();
+      } catch (error) {
+        console.error("Error marking project as completed:", error);
+      }
     }
   };
 

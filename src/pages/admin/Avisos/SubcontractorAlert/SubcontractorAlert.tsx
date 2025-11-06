@@ -12,23 +12,13 @@ import {
   DollarSignIcon,
 } from "lucide-react";
 import type { Subcontractor } from "../../../../types/subcontractor";
+import {
+  subcontractorPaymentService,
+  type SubcontractorPaymentAlertData,
+} from "../../../../services/subcontractorPaymentService";
 
-interface SubcontractorPaymentAlert {
-  id: string;
-  subcontractorId: string;
-  subcontractor: Subcontractor;
-  lastServiceDate: string;
-  nextPaymentDate: string;
-  amountDue: number;
-  currency: string;
-  status: "pending" | "overdue" | "due-today" | "paid";
-  priority: "low" | "medium" | "high";
-  description: string;
-  responsiblePerson: string;
-  lastUpdate: string;
-  serviceDescription?: string;
-  projectReference?: string;
-}
+// Usando SubcontractorPaymentAlertData do serviço
+type SubcontractorPaymentAlert = SubcontractorPaymentAlertData;
 
 const SubcontractorAlert: React.FC = () => {
   const navigate = useNavigate();
@@ -52,115 +42,22 @@ const SubcontractorAlert: React.FC = () => {
     useState<SubcontractorPaymentAlert | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Mock data - replace with real data from Firestore
   useEffect(() => {
-    const mockSubcontractors: Subcontractor[] = [
-      {
-        id: "sc1",
-        companyName: "John Doe Services LLC",
-        contactPerson: "John Doe",
-        email: "john@jds.com",
-        phone: "(555) 010-0456",
-        state: "CA",
-        city: "Los Angeles",
-        address: "123 Main St",
-        itinNumber: "12-3456789",
-        services: ["Excavation", "Drainage"],
-        hourlyRate: 85,
-        paymentTerms: "15",
-        availability: "available",
-        createdAt: new Date("2023-01-15"),
-        updatedAt: new Date("2024-01-15"),
-      },
-      {
-        id: "sc2",
-        companyName: "Build&Co Inc",
-        contactPerson: "Mary Smith",
-        email: "mary@buildco.com",
-        phone: "(555) 019-1111",
-        state: "TX",
-        city: "Houston",
-        address: "456 Oak Ave",
-        itinNumber: "98-7654321",
-        services: ["Concrete", "Foundation"],
-        hourlyRate: 95,
-        paymentTerms: "30",
-        availability: "busy",
-        createdAt: new Date("2023-03-20"),
-        updatedAt: new Date("2024-01-10"),
-      },
-      {
-        id: "sc3",
-        companyName: "RoadWorks LLC",
-        contactPerson: "Carlos Lima",
-        email: "carlos@roadworks.com",
-        phone: "(555) 017-2222",
-        state: "FL",
-        city: "Miami",
-        address: "789 Pine St",
-        itinNumber: "45-6789012",
-        services: ["Road Construction", "Asphalt"],
-        hourlyRate: 75,
-        paymentTerms: "7",
-        availability: "available",
-        createdAt: new Date("2023-06-10"),
-        updatedAt: new Date("2024-01-05"),
-      },
-    ];
-    const mockAlerts: SubcontractorPaymentAlert[] = [
-      {
-        id: "1",
-        subcontractorId: "sc1",
-        subcontractor: mockSubcontractors[0],
-        lastServiceDate: "2024-01-10",
-        nextPaymentDate: "2024-01-25",
-        amountDue: 3200,
-        currency: "USD",
-        status: "due-today",
-        priority: "high",
-        description: "Excavation work for drainage project",
-        responsiblePerson: "Mike Johnson",
-        lastUpdate: "2024-01-20",
-        serviceDescription: "Site excavation and drainage installation",
-        projectReference: "PROJ-2024-001",
-      },
-      {
-        id: "2",
-        subcontractorId: "sc2",
-        subcontractor: mockSubcontractors[1],
-        lastServiceDate: "2023-12-15",
-        nextPaymentDate: "2024-01-14",
-        amountDue: 5800,
-        currency: "USD",
-        status: "overdue",
-        priority: "high",
-        description: "Concrete foundation work",
-        responsiblePerson: "Sarah Wilson",
-        lastUpdate: "2024-01-15",
-        serviceDescription: "Foundation concrete pour and finishing",
-        projectReference: "PROJ-2023-045",
-      },
-      {
-        id: "3",
-        subcontractorId: "sc3",
-        subcontractor: mockSubcontractors[2],
-        lastServiceDate: "2024-01-20",
-        nextPaymentDate: "2024-01-27",
-        amountDue: 900,
-        currency: "USD",
-        status: "pending",
-        priority: "low",
-        description: "Road repair and asphalt work",
-        responsiblePerson: "David Brown",
-        lastUpdate: "2024-01-22",
-        serviceDescription: "Pothole repair and asphalt patching",
-        projectReference: "PROJ-2024-003",
-      },
-    ];
+    const fetchAlerts = async () => {
+      try {
+        setLoading(true);
+        const paymentAlerts =
+          await subcontractorPaymentService.getAllSubcontractorPaymentAlerts();
+        setAlerts(paymentAlerts);
+        setFilteredAlerts(paymentAlerts);
+      } catch (error) {
+        console.error("Error fetching subcontractor payment alerts:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    setAlerts(mockAlerts);
-    setFilteredAlerts(mockAlerts);
-    setLoading(false);
+    fetchAlerts();
   }, []);
 
   useEffect(() => {
@@ -266,18 +163,26 @@ const SubcontractorAlert: React.FC = () => {
     }
   };
 
-  const handleMarkAsPaid = (alertId: string) => {
-    setAlerts((prev) =>
-      prev.map((alert) =>
-        alert.id === alertId
-          ? {
-              ...alert,
-              status: "paid" as const,
-              lastUpdate: new Date().toISOString().split("T")[0],
-            }
-          : alert
-      )
-    );
+  const handleMarkAsPaid = async (alertId: string) => {
+    try {
+      await subcontractorPaymentService.markPaymentAsPaid(alertId);
+      
+      // Recarregar os alertas para refletir o novo status
+      const paymentAlerts =
+        await subcontractorPaymentService.getAllSubcontractorPaymentAlerts();
+      setAlerts(paymentAlerts);
+      setFilteredAlerts(paymentAlerts);
+      
+      // Se o alerta estava selecionado, atualizar também
+      if (selectedAlert && selectedAlert.id === alertId) {
+        const updatedAlert = paymentAlerts.find((alert) => alert.id === alertId);
+        if (updatedAlert) {
+          setSelectedAlert(updatedAlert);
+        }
+      }
+    } catch (error) {
+      console.error("Error marking payment as paid:", error);
+    }
   };
 
   const handleCloseModal = () => {

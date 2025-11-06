@@ -7,21 +7,13 @@ import {
   CheckCircleIcon,
   XCircleIcon,
 } from "lucide-react";
+import {
+  clientPaymentService,
+  type ClientPaymentAlertData,
+} from "../../../../services/clientPaymentService";
 
-interface ClientPaymentAlert {
-  id: string;
-  clientName: string;
-  clientId: string;
-  invoiceNumber: string;
-  amount: number;
-  dueDate: string;
-  status: "pending" | "overdue" | "paid" | "cancelled";
-  priority: "low" | "medium" | "high";
-  paymentMethod: "cash" | "transfer" | "check" | "pix";
-  description: string;
-  lastReminder: string;
-  reminderCount: number;
-}
+// Usando ClientPaymentAlertData do serviço
+type ClientPaymentAlert = ClientPaymentAlertData;
 
 const ClientAlert: React.FC = () => {
   const navigate = useNavigate();
@@ -43,53 +35,21 @@ const ClientAlert: React.FC = () => {
   >("all");
 
   useEffect(() => {
-    const mockAlerts: ClientPaymentAlert[] = [
-      {
-        id: "1",
-        clientName: "João Silva",
-        clientId: "CLI001",
-        invoiceNumber: "INV-2024-001",
-        amount: 2500.0,
-        dueDate: "2024-01-15",
-        status: "overdue",
-        priority: "high",
-        paymentMethod: "transfer",
-        description: "Payment for dental treatment - Implant",
-        lastReminder: "2024-01-10",
-        reminderCount: 3,
-      },
-      {
-        id: "2",
-        clientName: "Maria Oliveira",
-        clientId: "CLI002",
-        invoiceNumber: "INV-2024-002",
-        amount: 1500.0,
-        dueDate: "2024-02-20",
-        status: "pending",
-        priority: "medium",
-        paymentMethod: "cash",
-        description: "Payment for dental treatment - Scaling",
-        lastReminder: "2024-02-15",
-        reminderCount: 1,
-      },
-      {
-        id: "3",
-        clientName: "Pedro Santos",
-        clientId: "CLI003",
-        invoiceNumber: "INV-2024-003",
-        amount: 3000.0,
-        dueDate: "2024-03-10",
-        status: "paid",
-        priority: "low",
-        paymentMethod: "check",
-        description: "Payment for dental treatment - Cleaning",
-        lastReminder: "2024-03-05",
-        reminderCount: 0,
-      },
-    ];
+    const fetchAlerts = async () => {
+      try {
+        setLoading(true);
+        const paymentAlerts =
+          await clientPaymentService.getAllClientPaymentAlerts();
+        setAlerts(paymentAlerts);
+        setFilteredAlerts(paymentAlerts);
+      } catch (error) {
+        console.error("Error fetching client payment alerts:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    setAlerts(mockAlerts);
-    setLoading(false);
+    fetchAlerts();
   }, []);
 
   useEffect(() => {
@@ -178,32 +138,32 @@ const ClientAlert: React.FC = () => {
     }).format(amount);
   };
 
-  const hanldeMarkAsPaid = (alertId: string) => {
-    setAlerts((prev) =>
-      prev.map((alert) =>
-        alert.id === alertId
-          ? {
-              ...alert,
-              status: "paid" as const,
-              lastReminder: new Date().toISOString().split("T")[0],
-            }
-          : alert
-      )
-    );
+  const hanldeMarkAsPaid = async (alertId: string) => {
+    try {
+      await clientPaymentService.markPaymentAsPaid(alertId);
+      
+      // Recarregar os alertas para refletir o novo status
+      const paymentAlerts =
+        await clientPaymentService.getAllClientPaymentAlerts();
+      setAlerts(paymentAlerts);
+      setFilteredAlerts(paymentAlerts);
+    } catch (error) {
+      console.error("Error marking payment as paid:", error);
+    }
   };
 
-  const handleSendReminder = (alertId: string) => {
-    setAlerts((prev) =>
-      prev.map((alert) =>
-        alert.id === alertId
-          ? {
-              ...alert,
-              reminderCount: alert.reminderCount + 1,
-              lastReminder: new Date().toISOString().split("T")[0],
-            }
-          : alert
-      )
-    );
+  const handleSendReminder = async (alertId: string) => {
+    try {
+      await clientPaymentService.sendReminder(alertId);
+      
+      // Recarregar os alertas para refletir o novo contador de lembretes
+      const paymentAlerts =
+        await clientPaymentService.getAllClientPaymentAlerts();
+      setAlerts(paymentAlerts);
+      setFilteredAlerts(paymentAlerts);
+    } catch (error) {
+      console.error("Error sending reminder:", error);
+    }
   };
 
   const handleViewDetails = (alertId: string) => {
