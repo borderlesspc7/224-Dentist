@@ -3,13 +3,12 @@ import { clientService } from "../services/clientService";
 import { contractServiceService } from "../services/contractServiceService";
 import { vehicleService } from "../services/vehicleService";
 import { employeeService } from "../services/employeeService";
-import { subcontractorService } from "../services/subcontractorService";
-import { expenseTypeService } from "../services/expenseTypeService";
-import { servicePricingService } from "../services/servicePricingService";
 import { clientPaymentService } from "../services/clientPaymentService";
 import { subcontractorPaymentService } from "../services/subcontractorPaymentService";
 import { contractedServicePaymentService } from "../services/contractedServicePaymentService";
 import { projectService } from "../services/projectService";
+import { expenseTypeService } from "../services/expenseTypeService";
+import type { ContractService } from "../types/contractService";
 
 export interface ReportData {
   columns: string[];
@@ -39,14 +38,6 @@ const formatCurrency = (value: number, currency: string = "USD"): string => {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(value);
-};
-
-// Formatar data
-const formatDate = (date: Date | string): string => {
-  if (typeof date === "string") {
-    return date.split("T")[0];
-  }
-  return date.toISOString().split("T")[0];
 };
 
 // Filtrar por período
@@ -143,9 +134,7 @@ export const useReportsData = (): UseReportsDataReturn => {
             await contractServiceService.getAllContractServices();
           const clients = await clientService.getAllClients();
 
-          const clientMap = new Map(
-            clients.map((c) => [c.id || "", c])
-          );
+          const clientMap = new Map(clients.map((c) => [c.id || "", c]));
 
           const filteredServices = contractServices.filter((service) => {
             if (!service.startDate) return false;
@@ -232,9 +221,7 @@ export const useReportsData = (): UseReportsDataReturn => {
             await contractServiceService.getAllContractServices();
           const clients = await clientService.getAllClients();
 
-          const clientMap = new Map(
-            clients.map((c) => [c.id || "", c])
-          );
+          const clientMap = new Map(clients.map((c) => [c.id || "", c]));
 
           const filteredServices = contractServices.filter((service) => {
             if (!service.startDate) return false;
@@ -286,7 +273,7 @@ export const useReportsData = (): UseReportsDataReturn => {
           const contractServices =
             await contractServiceService.getAllContractServices();
 
-          const servicesByClient = new Map<string, any[]>();
+          const servicesByClient = new Map<string, ContractService[]>();
           contractServices.forEach((service) => {
             if (service.clientId) {
               const existing = servicesByClient.get(service.clientId) || [];
@@ -329,12 +316,14 @@ export const useReportsData = (): UseReportsDataReturn => {
         }
 
         case "expense-breakdown": {
-          const expenseTypes = await expenseTypeService.getAllExpenseTypes();
           const contractServices =
             await contractServiceService.getAllContractServices();
 
           // Agrupar despesas por tipo (simplificado - pode ser melhorado)
-          const expenseMap = new Map<string, { total: number; count: number }>();
+          const expenseMap = new Map<
+            string,
+            { total: number; count: number }
+          >();
 
           contractServices.forEach((service) => {
             const actualCost = service.budget.actualCost || 0;
@@ -358,12 +347,14 @@ export const useReportsData = (): UseReportsDataReturn => {
           return {
             columns: ["Category", "Amount", "Percentage", "Count", "Average"],
             rows: Array.from(expenseMap.entries()).map(([category, data]) => {
-              const percentage = totalExpenses > 0
-                ? ((data.total / totalExpenses) * 100).toFixed(0)
-                : "0";
-              const average = data.count > 0
-                ? formatCurrency(data.total / data.count, "USD")
-                : "$0";
+              const percentage =
+                totalExpenses > 0
+                  ? ((data.total / totalExpenses) * 100).toFixed(0)
+                  : "0";
+              const average =
+                data.count > 0
+                  ? formatCurrency(data.total / data.count, "USD")
+                  : "$0";
 
               return [
                 category,
@@ -377,14 +368,11 @@ export const useReportsData = (): UseReportsDataReturn => {
         }
 
         case "service-pricing": {
-          const servicePricings = await servicePricingService.getAllServicePricing();
           const contractServices =
             await contractServiceService.getAllContractServices();
           const clients = await clientService.getAllClients();
 
-          const clientMap = new Map(
-            clients.map((c) => [c.id || "", c])
-          );
+          const clientMap = new Map(clients.map((c) => [c.id || "", c]));
 
           return {
             columns: ["Service", "Client", "Price", "Cost", "Margin", "Status"],
@@ -425,27 +413,59 @@ export const useReportsData = (): UseReportsDataReturn => {
           // Agrupar alertas por tipo e prioridade
           const alertsByType: Record<
             string,
-            { total: number; critical: number; high: number; medium: number; low: number }
+            {
+              total: number;
+              critical: number;
+              high: number;
+              medium: number;
+              low: number;
+            }
           > = {
-            "Payment Due": { total: 0, critical: 0, high: 0, medium: 0, low: 0 },
-            "Vehicle Maintenance": { total: 0, critical: 0, high: 0, medium: 0, low: 0 },
-            "Project Deadline": { total: 0, critical: 0, high: 0, medium: 0, low: 0 },
-            "Contract Expiry": { total: 0, critical: 0, high: 0, medium: 0, low: 0 },
+            "Payment Due": {
+              total: 0,
+              critical: 0,
+              high: 0,
+              medium: 0,
+              low: 0,
+            },
+            "Vehicle Maintenance": {
+              total: 0,
+              critical: 0,
+              high: 0,
+              medium: 0,
+              low: 0,
+            },
+            "Project Deadline": {
+              total: 0,
+              critical: 0,
+              high: 0,
+              medium: 0,
+              low: 0,
+            },
+            "Contract Expiry": {
+              total: 0,
+              critical: 0,
+              high: 0,
+              medium: 0,
+              low: 0,
+            },
           };
 
           // Contar alertas de pagamento
-          [...clientAlerts, ...subcontractorAlerts, ...contractedServiceAlerts].forEach(
-            (alert) => {
-              const type = "Payment Due";
-              alertsByType[type].total++;
-              if (alert.priority === "high") alertsByType[type].high++;
-              else if (alert.priority === "medium") alertsByType[type].medium++;
-              else alertsByType[type].low++;
-              if (alert.status === "overdue" || alert.status === "due-today") {
-                alertsByType[type].critical++;
-              }
+          [
+            ...clientAlerts,
+            ...subcontractorAlerts,
+            ...contractedServiceAlerts,
+          ].forEach((alert) => {
+            const type = "Payment Due";
+            alertsByType[type].total++;
+            if (alert.priority === "high") alertsByType[type].high++;
+            else if (alert.priority === "medium") alertsByType[type].medium++;
+            else alertsByType[type].low++;
+            if (alert.status === "overdue" || alert.status === "due-today") {
+              alertsByType[type].critical++;
             }
-          );
+          });
 
           // Contar alertas de projetos
           projectAlerts.forEach((alert) => {
@@ -460,7 +480,14 @@ export const useReportsData = (): UseReportsDataReturn => {
           });
 
           return {
-            columns: ["Alert Type", "Count", "Critical", "High", "Medium", "Low"],
+            columns: [
+              "Alert Type",
+              "Count",
+              "Critical",
+              "High",
+              "Medium",
+              "Low",
+            ],
             rows: Object.entries(alertsByType).map(([type, data]) => [
               type,
               data.total.toString(),
@@ -571,7 +598,14 @@ export const useReportsData = (): UseReportsDataReturn => {
           });
 
           return {
-            columns: ["Month", "Income", "Expenses", "Net", "Change", "Balance"],
+            columns: [
+              "Month",
+              "Income",
+              "Expenses",
+              "Net",
+              "Change",
+              "Balance",
+            ],
             rows,
           };
         }
@@ -606,7 +640,9 @@ export const useReportsData = (): UseReportsDataReturn => {
       }
     } catch (err) {
       console.error("Error generating report data:", err);
-      setError(err instanceof Error ? err.message : "Failed to generate report");
+      setError(
+        err instanceof Error ? err.message : "Failed to generate report"
+      );
       return {
         columns: ["Error"],
         rows: [["Failed to load data"]],
@@ -687,9 +723,7 @@ export const useReportsData = (): UseReportsDataReturn => {
 
         case "vehicle-maintenance": {
           const vehicles = await vehicleService.getAllVehicles();
-          const activeVehicles = vehicles.filter(
-            (v) => v.status === "active"
-          );
+          const activeVehicles = vehicles.filter((v) => v.status === "active");
           const maintenanceDue = vehicles.filter((v) => {
             if (!v.nextMaintenanceDate) return false;
             const nextDate = new Date(v.nextMaintenanceDate);
@@ -698,7 +732,10 @@ export const useReportsData = (): UseReportsDataReturn => {
           });
 
           return [
-            { label: "Active Vehicles", value: activeVehicles.length.toString() },
+            {
+              label: "Active Vehicles",
+              value: activeVehicles.length.toString(),
+            },
             {
               label: "Maintenance Due",
               value: maintenanceDue.length.toString(),
@@ -717,7 +754,10 @@ export const useReportsData = (): UseReportsDataReturn => {
           );
 
           return [
-            { label: "Active Services", value: activeServices.length.toString() },
+            {
+              label: "Active Services",
+              value: activeServices.length.toString(),
+            },
             {
               label: "Completed",
               value: completedServices.length.toString(),
@@ -735,7 +775,10 @@ export const useReportsData = (): UseReportsDataReturn => {
 
           return [
             { label: "Total Clients", value: clients.length.toString() },
-            { label: "Active Projects", value: activeProjects.length.toString() },
+            {
+              label: "Active Projects",
+              value: activeProjects.length.toString(),
+            },
           ];
         }
 
@@ -743,7 +786,8 @@ export const useReportsData = (): UseReportsDataReturn => {
           const contractServices =
             await contractServiceService.getAllContractServices();
           const totalExpenses = contractServices.reduce(
-            (sum, s) => sum + (s.budget.actualCost || s.budget.estimatedCost || 0),
+            (sum, s) =>
+              sum + (s.budget.actualCost || s.budget.estimatedCost || 0),
             0
           );
           const expenseTypes = await expenseTypeService.getAllExpenseTypes();
@@ -860,4 +904,3 @@ export const useReportsData = (): UseReportsDataReturn => {
     getReportMetrics,
   };
 };
-

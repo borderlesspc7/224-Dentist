@@ -2,12 +2,7 @@ import { db } from "../lib/firebaseconfig";
 import { subcontractorService } from "./subcontractorService";
 import { contractServiceService } from "./contractServiceService";
 import type { Subcontractor } from "../types/subcontractor";
-import type { ContractService } from "../types/contractService";
-import {
-  doc,
-  getDoc,
-  setDoc,
-} from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 
 export interface SubcontractorPaymentAlertData {
   id: string;
@@ -51,10 +46,10 @@ const calculateStatus = (
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  
+
   const payment = new Date(paymentDate);
   payment.setHours(0, 0, 0, 0);
-  
+
   const diffTime = payment.getTime() - today.getTime();
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
@@ -82,10 +77,10 @@ const calculatePriority = (
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  
+
   const payment = new Date(paymentDate);
   payment.setHours(0, 0, 0, 0);
-  
+
   const diffTime = payment.getTime() - today.getTime();
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
@@ -99,9 +94,7 @@ const calculatePriority = (
 };
 
 // Verificar se o pagamento foi marcado como pago
-const checkPaymentStatus = async (
-  alertId: string
-): Promise<boolean> => {
+const checkPaymentStatus = async (alertId: string): Promise<boolean> => {
   try {
     const paymentRef = doc(db, SUBCONTRACTOR_PAYMENT_COLLECTION, alertId);
     const paymentSnap = await getDoc(paymentRef);
@@ -136,14 +129,17 @@ export const subcontractorPaymentService = {
   },
 
   // Buscar todos os alertas de pagamento de subcontratados
-  async getAllSubcontractorPaymentAlerts(): Promise<SubcontractorPaymentAlertData[]> {
+  async getAllSubcontractorPaymentAlerts(): Promise<
+    SubcontractorPaymentAlertData[]
+  > {
     try {
       // Buscar todos os serviços contratados
-      const contractServices = await contractServiceService.getAllContractServices();
-      
+      const contractServices =
+        await contractServiceService.getAllContractServices();
+
       // Buscar todos os subcontratados
       const subcontractors = await subcontractorService.getAllSubcontractors();
-      
+
       // Criar mapa de subcontratados por ID
       const subcontractorMap = new Map<string, Subcontractor>();
       subcontractors.forEach((sub) => {
@@ -178,7 +174,8 @@ export const subcontractorPaymentService = {
         );
 
         // Calcular valor devido (usar actualCost se disponível, senão estimatedCost)
-        const amountDue = service.budget.actualCost || service.budget.estimatedCost || 0;
+        const amountDue =
+          service.budget.actualCost || service.budget.estimatedCost || 0;
 
         // Calcular status e prioridade
         const status = calculateStatus(nextPaymentDate, isPaid);
@@ -226,6 +223,8 @@ export const subcontractorPaymentService = {
     subcontractorId: string
   ): Promise<SubcontractorPaymentAlertData[]> {
     const allAlerts = await this.getAllSubcontractorPaymentAlerts();
-    return allAlerts.filter((alert) => alert.subcontractorId === subcontractorId);
+    return allAlerts.filter(
+      (alert) => alert.subcontractorId === subcontractorId
+    );
   },
 };

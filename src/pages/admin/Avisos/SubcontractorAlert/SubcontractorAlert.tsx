@@ -11,7 +11,6 @@ import {
   XCircleIcon,
   DollarSignIcon,
 } from "lucide-react";
-import type { Subcontractor } from "../../../../types/subcontractor";
 import {
   subcontractorPaymentService,
   type SubcontractorPaymentAlertData,
@@ -166,16 +165,18 @@ const SubcontractorAlert: React.FC = () => {
   const handleMarkAsPaid = async (alertId: string) => {
     try {
       await subcontractorPaymentService.markPaymentAsPaid(alertId);
-      
+
       // Recarregar os alertas para refletir o novo status
       const paymentAlerts =
         await subcontractorPaymentService.getAllSubcontractorPaymentAlerts();
       setAlerts(paymentAlerts);
       setFilteredAlerts(paymentAlerts);
-      
+
       // Se o alerta estava selecionado, atualizar também
       if (selectedAlert && selectedAlert.id === alertId) {
-        const updatedAlert = paymentAlerts.find((alert) => alert.id === alertId);
+        const updatedAlert = paymentAlerts.find(
+          (alert) => alert.id === alertId
+        );
         if (updatedAlert) {
           setSelectedAlert(updatedAlert);
         }

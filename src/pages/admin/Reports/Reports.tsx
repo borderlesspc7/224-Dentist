@@ -49,11 +49,9 @@ const Reports: React.FC = () => {
   const [selectedReport, setSelectedReport] = useState<ReportCard | null>(null);
   const [reportData, setReportData] = useState<ReportData | null>(null);
   const [reportCards, setReportCards] = useState<ReportCard[]>([]);
-  const [loadingMetrics, setLoadingMetrics] = useState(false);
   const [loadingReportData, setLoadingReportData] = useState(false);
 
-  const { generateReportData, getReportMetrics, loading, error } =
-    useReportsData();
+  const { generateReportData, getReportMetrics } = useReportsData();
 
   // Definir estrutura base dos cards de relatório
   const baseReportCards: Omit<ReportCard, "metrics">[] = [
@@ -196,16 +194,11 @@ const Reports: React.FC = () => {
   // Carregar métricas dos relatórios
   useEffect(() => {
     const loadMetrics = async () => {
-      setLoadingMetrics(true);
       try {
         const { startDate, endDate } = getPeriodDates();
         const cardsWithMetrics = await Promise.all(
           baseReportCards.map(async (card) => {
-            const metrics = await getReportMetrics(
-              card.id,
-              startDate,
-              endDate
-            );
+            const metrics = await getReportMetrics(card.id, startDate, endDate);
             return {
               ...card,
               metrics: metrics.length > 0 ? metrics : undefined,
@@ -215,8 +208,6 @@ const Reports: React.FC = () => {
         setReportCards(cardsWithMetrics);
       } catch (err) {
         console.error("Error loading report metrics:", err);
-      } finally {
-        setLoadingMetrics(false);
       }
     };
 
@@ -251,7 +242,7 @@ const Reports: React.FC = () => {
     setIsModalOpen(true);
     setReportData(null);
     setLoadingReportData(true);
-    
+
     try {
       const { startDate, endDate } = getPeriodDates();
       const data = await generateReportData(report.id, startDate, endDate);
