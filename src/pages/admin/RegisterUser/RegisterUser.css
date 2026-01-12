@@ -172,3 +172,18 @@
   outline: none;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
+
+/* Permissions Section Styling */
+.permissions-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.permissions-section .form-help-text {
+  margin-top: 4px;
+  padding: 8px 12px;
+  background-color: #f0f9ff;
+  border-left: 3px solid #3b82f6;
+  border-radius: 4px;
+}

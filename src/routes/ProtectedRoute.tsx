@@ -2,12 +2,12 @@ import type { ReactNode } from "react";
 import React from "react";
 import { useAuth } from "../hooks/useAuth";
 import { Navigate } from "react-router-dom";
-import { hasAccess } from "./permissions";
+import { hasPermission, type Permission } from "../config/permissions";
 import "./ProtectedRoute.css";
 
 interface ProtectedRouteProps {
   children: ReactNode;
-  required?: string;
+  required?: Permission | "admin";
 }
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
@@ -29,9 +29,15 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   if (!user) return <Navigate to="/login" replace />;
 
-  const isAllowed = hasAccess(user, required);
+  // Special case for "admin" string - checks role
+  if (required === "admin") {
+    if (user.role !== "admin") return <Navigate to="/admin/dashboard" replace />;
+    return children;
+  }
 
-  if (!isAllowed) return <Navigate to="/" replace />;
+  const isAllowed = hasPermission(user, required);
+
+  if (!isAllowed) return <Navigate to="/admin/dashboard" replace />;
 
   return children;
 };

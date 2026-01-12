@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import "./Managment.css";
 import DataTable from "../../../components/ui/DataTable/DataTable";
 import { useDashboardData } from "../../../hooks/useDashboardData";
@@ -16,6 +16,8 @@ import {
 } from "lucide-react";
 import { useToast } from "../../../hooks/useToast";
 import ConfirmationModal from "../../../components/ui/ConfirmationModal/ConfirmationModal";
+import { usePermissions } from "../../../hooks/usePermissions";
+import { PERMISSIONS, type Permission } from "../../../config/permissions";
 
 interface DashboardSection {
   id: string;
@@ -23,6 +25,7 @@ interface DashboardSection {
   icon: React.ReactNode;
   description: string;
   route: string;
+  permission: Permission;
 }
 
 const dashboardSections: DashboardSection[] = [
@@ -32,6 +35,7 @@ const dashboardSections: DashboardSection[] = [
     icon: <UserPlusIcon />,
     description: "Manage system users and their permissions",
     route: "/dashboard/users",
+    permission: PERMISSIONS.REGISTER_USER,
   },
   {
     id: "services",
@@ -39,6 +43,7 @@ const dashboardSections: DashboardSection[] = [
     icon: <ServerIcon />,
     description: "Manage available services",
     route: "/dashboard/services",
+    permission: PERMISSIONS.REGISTER_SERVICE,
   },
   {
     id: "clients",
@@ -46,6 +51,7 @@ const dashboardSections: DashboardSection[] = [
     icon: <UsersIcon />,
     description: "Manage client information and records",
     route: "/dashboard/clients",
+    permission: PERMISSIONS.REGISTER_CLIENT,
   },
   {
     id: "employees",
@@ -53,6 +59,7 @@ const dashboardSections: DashboardSection[] = [
     icon: <UserPlusIcon />,
     description: "Manage employee profiles and information",
     route: "/dashboard/employees",
+    permission: PERMISSIONS.REGISTER_EMPLOYEE,
   },
   {
     id: "subcontractors",
@@ -60,6 +67,7 @@ const dashboardSections: DashboardSection[] = [
     icon: <UserPlusIcon />,
     description: "Manage subcontractor information",
     route: "/dashboard/subcontractors",
+    permission: PERMISSIONS.REGISTER_SUBCONTRACTOR,
   },
   {
     id: "contract-services",
@@ -67,6 +75,7 @@ const dashboardSections: DashboardSection[] = [
     icon: <ServerIcon />,
     description: "Manage contracted services",
     route: "/dashboard/contract-services",
+    permission: PERMISSIONS.REGISTER_CONTRACT_SERVICE,
   },
   {
     id: "financings",
@@ -74,6 +83,7 @@ const dashboardSections: DashboardSection[] = [
     icon: <CreditCardIcon />,
     description: "Manage financing information",
     route: "/dashboard/financings",
+    permission: PERMISSIONS.REGISTER_FINANCING,
   },
   {
     id: "vehicles",
@@ -81,6 +91,7 @@ const dashboardSections: DashboardSection[] = [
     icon: <CarIcon />,
     description: "Manage vehicle fleet and information",
     route: "/dashboard/vehicles",
+    permission: PERMISSIONS.REGISTER_VEHICLE,
   },
   {
     id: "bank-accounts",
@@ -88,6 +99,7 @@ const dashboardSections: DashboardSection[] = [
     icon: <HomeIcon />,
     description: "Manage bank accounts and financial information",
     route: "/dashboard/bank-accounts",
+    permission: PERMISSIONS.REGISTER_BANK_ACCOUNT,
   },
   {
     id: "credit-cards",
@@ -95,6 +107,7 @@ const dashboardSections: DashboardSection[] = [
     icon: <WalletIcon />,
     description: "Manage credit cards for teams and operations",
     route: "/dashboard/credit-cards",
+    permission: PERMISSIONS.REGISTER_CREDIT_CARD,
   },
   {
     id: "expense-types",
@@ -102,6 +115,7 @@ const dashboardSections: DashboardSection[] = [
     icon: <FileTextIcon />,
     description: "Manage expense categories and types",
     route: "/dashboard/expense-types",
+    permission: PERMISSIONS.REGISTER_EXPENSE_TYPE,
   },
   {
     id: "service-pricing",
@@ -109,6 +123,7 @@ const dashboardSections: DashboardSection[] = [
     icon: <DollarSignIcon />,
     description: "Manage service pricing by client",
     route: "/dashboard/service-pricing",
+    permission: PERMISSIONS.REGISTER_SERVICE_PRICING,
   },
 ];
 
@@ -116,6 +131,7 @@ export default function Dashboard() {
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
   const { data, loading, refreshData } = useDashboardData();
   const { showSuccess, showError } = useToast();
+  const { checkPermission } = usePermissions();
   const [deleteModal, setDeleteModal] = useState<{
     isOpen: boolean;
     record: Record<string, unknown> | null;
@@ -123,6 +139,11 @@ export default function Dashboard() {
     isOpen: false,
     record: null,
   });
+
+  // Filter sections based on user permissions
+  const filteredSections = useMemo(() => {
+    return dashboardSections.filter((section) => checkPermission(section.permission));
+  }, [checkPermission]);
 
   const handleSectionClick = (sectionId: string) => {
     setSelectedSection(selectedSection === sectionId ? null : sectionId);
@@ -476,28 +497,36 @@ export default function Dashboard() {
   return (
     <div className="dashboard">
       <div className="dashboard-content">
-        <div className="sections-grid">
-          {dashboardSections.map((section) => (
-            <div
-              key={section.id}
-              className={`section-card ${
-                selectedSection === section.id ? "active" : ""
-              }`}
-              onClick={() => handleSectionClick(section.id)}
-            >
-              <div className="section-icon">{section.icon}</div>
-              <div className="section-info">
-                <h3>{section.title}</h3>
-                <p>{section.description}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {selectedSection && (
-          <div className="section-details">
-            {renderSectionContent(selectedSection)}
+        {filteredSections.length === 0 ? (
+          <div className="empty-message">
+            <p>Você não tem permissão para gerenciar nenhuma seção.</p>
           </div>
+        ) : (
+          <>
+            <div className="sections-grid">
+              {filteredSections.map((section) => (
+                <div
+                  key={section.id}
+                  className={`section-card ${
+                    selectedSection === section.id ? "active" : ""
+                  }`}
+                  onClick={() => handleSectionClick(section.id)}
+                >
+                  <div className="section-icon">{section.icon}</div>
+                  <div className="section-info">
+                    <h3>{section.title}</h3>
+                    <p>{section.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {selectedSection && (
+              <div className="section-details">
+                {renderSectionContent(selectedSection)}
+              </div>
+            )}
+          </>
         )}
       </div>
 

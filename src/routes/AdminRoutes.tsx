@@ -23,57 +23,59 @@ import ContractedServiceAlert from "../pages/admin/Avisos/ContractedServiceAlert
 import Users from "../pages/admin/User/User";
 import Reports from "../pages/admin/Reports/Reports";
 import Dashboard from "../pages/admin/Dashboard/Dashboard";
+import { ProtectedRoute } from "./ProtectedRoute";
+import { PERMISSIONS } from "../config/permissions";
 
 export default function AdminRoutes() {
   return (
     <Routes>
       <Route path="/" element={<AdminLayout />}>
-        <Route index element={<Dashboard />} />
-        <Route path="dashboard" element={<Dashboard />} />
-        <Route path="managment" element={<Managment />} />
-        <Route path="cadastros" element={<Cadastros />} />
-        <Route path="avisos" element={<Avisos />} />
-        <Route path="users" element={<Users />} />
-        <Route path="relatorios" element={<Reports />} />
-        <Route path="manutencao-veiculos" element={<VehicleAlert />} />
+        <Route index element={<ProtectedRoute required={PERMISSIONS.DASHBOARD}><Dashboard /></ProtectedRoute>} />
+        <Route path="dashboard" element={<ProtectedRoute required={PERMISSIONS.DASHBOARD}><Dashboard /></ProtectedRoute>} />
+        <Route path="managment" element={<ProtectedRoute required={PERMISSIONS.MANAGEMENT}><Managment /></ProtectedRoute>} />
+        <Route path="cadastros" element={<ProtectedRoute required={PERMISSIONS.CADASTROS}><Cadastros /></ProtectedRoute>} />
+        <Route path="avisos" element={<ProtectedRoute required={PERMISSIONS.ALERTS}><Avisos /></ProtectedRoute>} />
+        <Route path="users" element={<ProtectedRoute required={PERMISSIONS.USERS}><Users /></ProtectedRoute>} />
+        <Route path="relatorios" element={<ProtectedRoute required={PERMISSIONS.REPORTS}><Reports /></ProtectedRoute>} />
+        <Route path="manutencao-veiculos" element={<ProtectedRoute required={PERMISSIONS.ALERT_VEHICLE}><VehicleAlert /></ProtectedRoute>} />
 
-        <Route path="termino-projeto" element={<ProjectAlert />} />
+        <Route path="termino-projeto" element={<ProtectedRoute required={PERMISSIONS.ALERT_PROJECT}><ProjectAlert /></ProtectedRoute>} />
         <Route
           path="pagamento-subcontratados"
-          element={<SubcontractorAlert />}
+          element={<ProtectedRoute required={PERMISSIONS.ALERT_SUBCONTRACTOR}><SubcontractorAlert /></ProtectedRoute>}
         />
-        <Route path="recebimento-cliente" element={<ClientAlert />} />
+        <Route path="recebimento-cliente" element={<ProtectedRoute required={PERMISSIONS.ALERT_CLIENT}><ClientAlert /></ProtectedRoute>} />
         <Route
           path="pagamento-servicos-contratados"
-          element={<ContractedServiceAlert />}
+          element={<ProtectedRoute required={PERMISSIONS.ALERT_CONTRACT_SERVICE}><ContractedServiceAlert /></ProtectedRoute>}
         />
 
-        <Route path="cadastro-usuario" element={<RegisterUser />} />
-        <Route path="cadastro-servico" element={<RegisterService />} />
-        <Route path="cadastro-clientes" element={<RegisterClient />} />
-        <Route path="cadastro-funcionario" element={<RegisterEmployee />} />
+        <Route path="cadastro-usuario" element={<ProtectedRoute required={PERMISSIONS.REGISTER_USER}><RegisterUser /></ProtectedRoute>} />
+        <Route path="cadastro-servico" element={<ProtectedRoute required={PERMISSIONS.REGISTER_SERVICE}><RegisterService /></ProtectedRoute>} />
+        <Route path="cadastro-clientes" element={<ProtectedRoute required={PERMISSIONS.REGISTER_CLIENT}><RegisterClient /></ProtectedRoute>} />
+        <Route path="cadastro-funcionario" element={<ProtectedRoute required={PERMISSIONS.REGISTER_EMPLOYEE}><RegisterEmployee /></ProtectedRoute>} />
         <Route
           path="cadastro-subcontratados"
-          element={<RegisterSubcontractor />}
+          element={<ProtectedRoute required={PERMISSIONS.REGISTER_SUBCONTRACTOR}><RegisterSubcontractor /></ProtectedRoute>}
         />
         <Route
           path="cadastro-servicos-contratados"
-          element={<RegisterContractService />}
+          element={<ProtectedRoute required={PERMISSIONS.REGISTER_CONTRACT_SERVICE}><RegisterContractService /></ProtectedRoute>}
         />
-        <Route path="cadastro-financiamentos" element={<RegisterFinancing />} />
-        <Route path="cadastro-veiculos" element={<RegisterVehicle />} />
+        <Route path="cadastro-financiamentos" element={<ProtectedRoute required={PERMISSIONS.REGISTER_FINANCING}><RegisterFinancing /></ProtectedRoute>} />
+        <Route path="cadastro-veiculos" element={<ProtectedRoute required={PERMISSIONS.REGISTER_VEHICLE}><RegisterVehicle /></ProtectedRoute>} />
         <Route
           path="cadastro-conta-bancaria"
-          element={<RegisterBankAccount />}
+          element={<ProtectedRoute required={PERMISSIONS.REGISTER_BANK_ACCOUNT}><RegisterBankAccount /></ProtectedRoute>}
         />
         <Route
           path="cadastro-cartao-credito"
-          element={<RegisterCreditCard />}
+          element={<ProtectedRoute required={PERMISSIONS.REGISTER_CREDIT_CARD}><RegisterCreditCard /></ProtectedRoute>}
         />
-        <Route path="cadastro-tipo-despesa" element={<RegisterExpenseType />} />
+        <Route path="cadastro-tipo-despesa" element={<ProtectedRoute required={PERMISSIONS.REGISTER_EXPENSE_TYPE}><RegisterExpenseType /></ProtectedRoute>} />
         <Route
           path="cadastro-preco-servico"
-          element={<RegisterServicePricing />}
+          element={<ProtectedRoute required={PERMISSIONS.REGISTER_SERVICE_PRICING}><RegisterServicePricing /></ProtectedRoute>}
         />
       </Route>
     </Routes>

@@ -2,18 +2,18 @@
 
 import type React from "react";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { FiUser, FiShield } from "react-icons/fi";
 import Input from "../../../components/ui/Input/Input";
 import MultiSelect from "../../../components/ui/MultiSelect/MultiSelect";
 import Button from "../../../components/ui/Button/Button";
-import { pathOptions } from "../navigationOptions";
 import "../../../styles/forms.css";
 import "./RegisterUser.css";
 import { authService } from "../../../services/authService";
 import { userService } from "../../../services/userService";
 import type { RegisterCredentials } from "../../../types/user";
+import { PERMISSION_GROUPS, PERMISSION_LABELS, getAllPermissions } from "../../../config/permissions";
 
 interface FormData {
   email: string;
@@ -45,11 +45,13 @@ const RegisterUserPage: React.FC = () => {
     allowedPaths: [],
   });
 
-  // Path options for MultiSelect (without icons)
-  const pathOptionsForForm = pathOptions.map(({ value, label }) => ({
-    value,
-    label,
-  }));
+  // Permission options for MultiSelect - using centralized permission system
+  const permissionOptionsForForm = useMemo(() => {
+    return getAllPermissions().map((permission) => ({
+      value: permission,
+      label: PERMISSION_LABELS[permission],
+    }));
+  }, []);
 
   // Validation errors
   const [errors, setErrors] = useState<FormErrors>({});
@@ -324,16 +326,22 @@ const RegisterUserPage: React.FC = () => {
             </div>
 
             {!isAdmin && (
-              <MultiSelect
-                label="Allowed Pages"
-                options={pathOptionsForForm}
-                value={formData.allowedPaths}
-                onChange={(value) => handleInputChange("allowedPaths", value)}
-                placeholder="Select which pages this user can access..."
-                error={errors.allowedPaths}
-                required={!isAdmin}
-                disabled={isAdmin || loading}
-              />
+              <div className="permissions-section">
+                <MultiSelect
+                  label="Permissões do Usuário"
+                  options={permissionOptionsForForm}
+                  value={formData.allowedPaths}
+                  onChange={(value) => handleInputChange("allowedPaths", value)}
+                  placeholder="Selecione as permissões que o usuário terá..."
+                  error={errors.allowedPaths}
+                  required={!isAdmin}
+                  disabled={isAdmin || loading}
+                />
+                <small className="form-help-text">
+                  Selecione quais áreas do sistema o usuário poderá acessar. 
+                  Administradores têm acesso total automaticamente.
+                </small>
+              </div>
             )}
           </div>
 

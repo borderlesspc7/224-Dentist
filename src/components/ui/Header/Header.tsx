@@ -1,6 +1,7 @@
-
+import { LogOutIcon } from "lucide-react";
 import { useAuth } from "../../../hooks/useAuth";
 import "./Header.css";
+import { authService } from "../../../services/authService";
 
 export default function Header() {
   const { user } = useAuth();
@@ -21,6 +22,14 @@ export default function Header() {
         <p className="header-subtitle">Manage registrations and settings</p>
       </div>
       <div className="header-right">
+        <div className="logout-container">
+          <button
+            className="logout-button"
+            onClick={() => authService.logOut()}
+          >
+            <LogOutIcon />
+          </button>
+        </div>
         <div className="user-info">
           <div className="avatar" aria-hidden>
             {initials}
