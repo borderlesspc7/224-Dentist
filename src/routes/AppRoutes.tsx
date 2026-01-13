@@ -1,6 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { paths } from "./paths";
-import { ProtectedRoute } from "./ProtectedRoute";
 import LoginPage from "../pages/LoginPage/LoginPage";
 import AdminRoutes from "./AdminRoutes";
 
@@ -16,14 +15,7 @@ export default function AppRoutes() {
         <Route path={paths.login} element={<LoginPage />} />
         <Route path={paths.register} element={<Register />} />
         <Route path="*" element={<LoginPage />} />
-        <Route
-          path="/admin/*"
-          element={
-            <ProtectedRoute required="admin">
-              <AdminRoutes />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/admin/*" element={<AdminRoutes />} />
       </Routes>
     </BrowserRouter>
   );

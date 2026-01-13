@@ -23,6 +23,7 @@ import ContractedServiceAlert from "../pages/admin/Avisos/ContractedServiceAlert
 import Users from "../pages/admin/User/User";
 import Reports from "../pages/admin/Reports/Reports";
 import Dashboard from "../pages/admin/Dashboard/Dashboard";
+import NoPermissions from "../pages/admin/NoPermissions/NoPermissions";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { PERMISSIONS } from "../config/permissions";
 
@@ -32,6 +33,7 @@ export default function AdminRoutes() {
       <Route path="/" element={<AdminLayout />}>
         <Route index element={<ProtectedRoute required={PERMISSIONS.DASHBOARD}><Dashboard /></ProtectedRoute>} />
         <Route path="dashboard" element={<ProtectedRoute required={PERMISSIONS.DASHBOARD}><Dashboard /></ProtectedRoute>} />
+        <Route path="no-permissions" element={<NoPermissions />} />
         <Route path="managment" element={<ProtectedRoute required={PERMISSIONS.MANAGEMENT}><Managment /></ProtectedRoute>} />
         <Route path="cadastros" element={<ProtectedRoute required={PERMISSIONS.CADASTROS}><Cadastros /></ProtectedRoute>} />
         <Route path="avisos" element={<ProtectedRoute required={PERMISSIONS.ALERTS}><Avisos /></ProtectedRoute>} />

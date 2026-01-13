@@ -31,13 +31,13 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // Special case for "admin" string - checks role
   if (required === "admin") {
-    if (user.role !== "admin") return <Navigate to="/admin/dashboard" replace />;
+    if (user.role !== "admin") return <Navigate to="/admin/no-permissions" replace />;
     return children;
   }
 
   const isAllowed = hasPermission(user, required);
 
-  if (!isAllowed) return <Navigate to="/admin/dashboard" replace />;
+  if (!isAllowed) return <Navigate to="/admin/no-permissions" replace />;
 
   return children;
 };
