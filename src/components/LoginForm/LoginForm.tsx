@@ -85,8 +85,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
         size="full"
         loading={loading}
         disabled={loading}
+        className="login-button"
       >
-        {loading ? "Signing In..." : "Login"}
+        {loading ? "" : "Login"}
       </Button>
     </form>
   );

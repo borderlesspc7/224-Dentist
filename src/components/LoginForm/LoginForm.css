@@ -4,3 +4,10 @@
   gap: 20px;
   width: 100%;
 }
+
+.login-button {
+  min-width: 100px !important;
+  position: relative !important;
+  padding: 1.5rem 1.5rem !important;
+  width: 100% !important;
+}

@@ -35,8 +35,8 @@ const Button: React.FC<ButtonProps> = ({
       onClick={onClick}
       className={allClasses}
     >
-      {loading && <div className="loading-spinner" />}
       {children}
+      {loading && <div className="loading-spinner" />}
     </button>
   );
 };
