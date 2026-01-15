@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { useDashboardData } from "../../../hooks/useDashboardData";
+import { useDashboardAlerts } from "../../../hooks/useDashboardAlerts";
 import { useNavigation } from "../../../hooks/useNavigation";
 import {
   UsersIcon,
@@ -35,16 +36,9 @@ interface StatCard {
   route?: string;
 }
 
-interface Alert {
-  id: string;
-  type: "warning" | "info" | "error" | "success";
-  title: string;
-  message: string;
-  time: string;
-}
-
 export default function Dashboard() {
   const { data, loading, refreshData } = useDashboardData();
+  const { alerts: recentAlerts, loading: alertsLoading } = useDashboardAlerts();
   const { goTo } = useNavigation();
 
   // Calculate statistics
@@ -153,48 +147,6 @@ export default function Dashboard() {
     [data]
   );
 
-  // Mock alerts (as requested, since alerts system is mocked)
-  const recentAlerts: Alert[] = useMemo(
-    () => [
-      {
-        id: "1",
-        type: "warning",
-        title: "Payment Overdue",
-        message: "Invoice #2024-045 from ABC Corp is 5 days overdue",
-        time: "2 hours ago",
-      },
-      {
-        id: "2",
-        type: "error",
-        title: "Vehicle Maintenance",
-        message: "Ford F-150 (ABC-1234) requires urgent maintenance",
-        time: "5 hours ago",
-      },
-      {
-        id: "3",
-        type: "info",
-        title: "New Client Added",
-        message: "John Doe Services LLC has been added to the system",
-        time: "1 day ago",
-      },
-      {
-        id: "4",
-        type: "success",
-        title: "Contract Completed",
-        message: "Pipeline Installation project completed successfully",
-        time: "2 days ago",
-      },
-      {
-        id: "5",
-        type: "warning",
-        title: "License Expiring",
-        message: "Driver's license for Maria Silva expires in 15 days",
-        time: "3 days ago",
-      },
-    ],
-    []
-  );
-
   // Calculate totals
   const totalRecords = useMemo(
     () => stats.reduce((acc, stat) => acc + stat.count, 0),
@@ -211,7 +163,7 @@ export default function Dashboard() {
     await refreshData();
   };
 
-  const getAlertIcon = (type: Alert["type"]) => {
+  const getAlertIcon = (type: "warning" | "info" | "error" | "success") => {
     switch (type) {
       case "warning":
         return <AlertCircleIcon />;
@@ -226,7 +178,7 @@ export default function Dashboard() {
     }
   };
 
-  if (loading) {
+  if (loading || alertsLoading) {
     return (
       <div className="dashboard">
         <div className="dashboard-loading">
@@ -366,18 +318,28 @@ export default function Dashboard() {
           </div>
 
           <div className="alerts-container">
-            {recentAlerts.map((alert) => (
-              <div key={alert.id} className={`alert-card alert-${alert.type}`}>
-                <div className="alert-icon">{getAlertIcon(alert.type)}</div>
-                <div className="alert-content">
-                  <div className="alert-header">
-                    <h4>{alert.title}</h4>
-                    <span className="alert-time">{alert.time}</span>
-                  </div>
-                  <p>{alert.message}</p>
-                </div>
+            {recentAlerts.length === 0 ? (
+              <div className="no-alerts-message">
+                <CheckCircleIcon />
+                <p>No recent alerts. Everything is running smoothly!</p>
               </div>
-            ))}
+            ) : (
+              recentAlerts.map((alert) => (
+                <div
+                  key={alert.id}
+                  className={`alert-card alert-${alert.type}`}
+                >
+                  <div className="alert-icon">{getAlertIcon(alert.type)}</div>
+                  <div className="alert-content">
+                    <div className="alert-header">
+                      <h4>{alert.title}</h4>
+                      <span className="alert-time">{alert.time}</span>
+                    </div>
+                    <p>{alert.message}</p>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
 
           <div className="alerts-footer">

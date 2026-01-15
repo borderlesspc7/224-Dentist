@@ -2,6 +2,7 @@ import React from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { useNavigation } from "../../hooks/useNavigation";
 import LoginForm from "../../components/LoginForm/LoginForm";
+import { paths } from "../../routes/paths";
 import "./LoginPage.css";
 
 const LoginPage: React.FC = () => {
@@ -15,6 +16,10 @@ const LoginPage: React.FC = () => {
     await login({ email, password });
     // Login bem-sucedido, redireciona para admin
     goTo("/admin");
+  };
+
+  const handleForgotPassword = () => {
+    goTo(paths.forgotPassword);
   };
 
   return (
@@ -35,9 +40,13 @@ const LoginPage: React.FC = () => {
           <LoginForm onLogin={handleLogin} />
 
           <div className="login-footer">
-            <a href="#" className="forgot-password">
+            <button
+              type="button"
+              onClick={handleForgotPassword}
+              className="forgot-password"
+            >
               Forgot password?
-            </a>
+            </button>
           </div>
         </div>
       </div>
