@@ -13,7 +13,7 @@ import "./RegisterUser.css";
 import { authService } from "../../../services/authService";
 import { userService } from "../../../services/userService";
 import type { RegisterCredentials } from "../../../types/user";
-import { PERMISSION_GROUPS, PERMISSION_LABELS, getAllPermissions } from "../../../config/permissions";
+import { PERMISSION_LABELS, getAllPermissions } from "../../../config/permissions";
 
 interface FormData {
   email: string;

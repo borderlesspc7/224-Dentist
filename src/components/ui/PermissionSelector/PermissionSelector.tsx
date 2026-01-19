@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { PERMISSION_GROUPS, PERMISSION_LABELS, type Permission } from "../../../config/permissions";
 import "./PermissionSelector.css";
 
