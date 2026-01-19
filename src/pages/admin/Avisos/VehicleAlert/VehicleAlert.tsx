@@ -35,6 +35,10 @@ const VehicleAlert: React.FC = () => {
   const [alerts, setAlerts] = useState<VehicleAlert[]>([]);
   const [filteredAlerts, setFilteredAlerts] = useState<VehicleAlert[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedAlert, setSelectedAlert] = useState<VehicleAlert | null>(null);
+  const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loadingVehicle, setLoadingVehicle] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState<
     "all" | "date" | "mileage" | "hours"
@@ -75,6 +79,21 @@ const VehicleAlert: React.FC = () => {
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   };
 
+  // Função para verificar se uma data está dentro do período relevante para alertas
+  const isDateRelevant = (date: Date): boolean => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const targetDate = new Date(date);
+    targetDate.setHours(0, 0, 0, 0);
+    
+    const daysUntil = daysUntilDue(date);
+    
+    // Gerar alerta apenas se:
+    // 1. A data já passou (overdue) OU
+    // 2. A data está nos próximos 90 dias
+    return daysUntil <= 90;
+  };
+
   // Função para gerar alertas a partir dos veículos
   const generateAlertsFromVehicles = (vehicles: Vehicle[]): VehicleAlert[] => {
     const alerts: VehicleAlert[] = [];
@@ -89,121 +108,131 @@ const VehicleAlert: React.FC = () => {
       // Alert de manutenção
       if (vehicle.nextMaintenanceDate) {
         const maintenanceDate = new Date(vehicle.nextMaintenanceDate);
-        const daysUntil = daysUntilDue(maintenanceDate);
-        const status = calculateStatus(maintenanceDate);
-        const priority = calculatePriority(daysUntil);
+        if (isDateRelevant(maintenanceDate)) {
+          const daysUntil = daysUntilDue(maintenanceDate);
+          const status = calculateStatus(maintenanceDate);
+          const priority = calculatePriority(daysUntil);
 
-        alerts.push({
-          id: `maintenance-${vehicle.id}-${alertIdCounter++}`,
-          vehicleId: vehicle.id,
-          vehicleName,
-          licensePlate: vehicle.licensePlate,
-          alertType: "date",
-          currentValue: 0,
-          limitValue: 0,
-          dueDate: vehicle.nextMaintenanceDate,
-          status,
-          priority,
-          description: "Manutenção programada",
-          lastMaintenance,
-          nextMaintenance: vehicle.nextMaintenanceDate,
-        });
+          alerts.push({
+            id: `maintenance-${vehicle.id}-${alertIdCounter++}`,
+            vehicleId: vehicle.id,
+            vehicleName,
+            licensePlate: vehicle.licensePlate,
+            alertType: "date",
+            currentValue: 0,
+            limitValue: 0,
+            dueDate: vehicle.nextMaintenanceDate,
+            status,
+            priority,
+            description: "Manutenção programada",
+            lastMaintenance,
+            nextMaintenance: vehicle.nextMaintenanceDate,
+          });
+        }
       }
 
       // Alert de renovação de placa
       if (vehicle.licensePlateRenewalDate) {
         const renewalDate = new Date(vehicle.licensePlateRenewalDate);
-        const daysUntil = daysUntilDue(renewalDate);
-        const status = calculateStatus(renewalDate);
-        const priority = calculatePriority(daysUntil);
+        if (isDateRelevant(renewalDate)) {
+          const daysUntil = daysUntilDue(renewalDate);
+          const status = calculateStatus(renewalDate);
+          const priority = calculatePriority(daysUntil);
 
-        alerts.push({
-          id: `plate-${vehicle.id}-${alertIdCounter++}`,
-          vehicleId: vehicle.id,
-          vehicleName,
-          licensePlate: vehicle.licensePlate,
-          alertType: "date",
-          currentValue: 0,
-          limitValue: 0,
-          dueDate: vehicle.licensePlateRenewalDate,
-          status,
-          priority,
-          description: "Renovação de placa",
-          lastMaintenance,
-          nextMaintenance: vehicle.nextMaintenanceDate || "",
-        });
+          alerts.push({
+            id: `plate-${vehicle.id}-${alertIdCounter++}`,
+            vehicleId: vehicle.id,
+            vehicleName,
+            licensePlate: vehicle.licensePlate,
+            alertType: "date",
+            currentValue: 0,
+            limitValue: 0,
+            dueDate: vehicle.licensePlateRenewalDate,
+            status,
+            priority,
+            description: "Renovação de placa",
+            lastMaintenance,
+            nextMaintenance: vehicle.nextMaintenanceDate || "",
+          });
+        }
       }
 
       // Alert de renovação DOT
       if (vehicle.dotRenewalDate) {
         const renewalDate = new Date(vehicle.dotRenewalDate);
-        const daysUntil = daysUntilDue(renewalDate);
-        const status = calculateStatus(renewalDate);
-        const priority = calculatePriority(daysUntil);
+        if (isDateRelevant(renewalDate)) {
+          const daysUntil = daysUntilDue(renewalDate);
+          const status = calculateStatus(renewalDate);
+          const priority = calculatePriority(daysUntil);
 
-        alerts.push({
-          id: `dot-${vehicle.id}-${alertIdCounter++}`,
-          vehicleId: vehicle.id,
-          vehicleName,
-          licensePlate: vehicle.licensePlate,
-          alertType: "date",
-          currentValue: 0,
-          limitValue: 0,
-          dueDate: vehicle.dotRenewalDate,
-          status,
-          priority,
-          description: "Renovação DOT",
-          lastMaintenance,
-          nextMaintenance: vehicle.nextMaintenanceDate || "",
-        });
+          alerts.push({
+            id: `dot-${vehicle.id}-${alertIdCounter++}`,
+            vehicleId: vehicle.id,
+            vehicleName,
+            licensePlate: vehicle.licensePlate,
+            alertType: "date",
+            currentValue: 0,
+            limitValue: 0,
+            dueDate: vehicle.dotRenewalDate,
+            status,
+            priority,
+            description: "Renovação DOT",
+            lastMaintenance,
+            nextMaintenance: vehicle.nextMaintenanceDate || "",
+          });
+        }
       }
 
       // Alert de expiração do seguro
       if (vehicle.insuranceExpiry) {
         const expiryDate = new Date(vehicle.insuranceExpiry);
-        const daysUntil = daysUntilDue(expiryDate);
-        const status = calculateStatus(expiryDate);
-        const priority = calculatePriority(daysUntil);
+        if (isDateRelevant(expiryDate)) {
+          const daysUntil = daysUntilDue(expiryDate);
+          const status = calculateStatus(expiryDate);
+          const priority = calculatePriority(daysUntil);
 
-        alerts.push({
-          id: `insurance-${vehicle.id}-${alertIdCounter++}`,
-          vehicleId: vehicle.id,
-          vehicleName,
-          licensePlate: vehicle.licensePlate,
-          alertType: "date",
-          currentValue: 0,
-          limitValue: 0,
-          dueDate: vehicle.insuranceExpiry,
-          status,
-          priority,
-          description: "Expiração do seguro",
-          lastMaintenance,
-          nextMaintenance: vehicle.nextMaintenanceDate || "",
-        });
+          alerts.push({
+            id: `insurance-${vehicle.id}-${alertIdCounter++}`,
+            vehicleId: vehicle.id,
+            vehicleName,
+            licensePlate: vehicle.licensePlate,
+            alertType: "date",
+            currentValue: 0,
+            limitValue: 0,
+            dueDate: vehicle.insuranceExpiry,
+            status,
+            priority,
+            description: "Expiração do seguro",
+            lastMaintenance,
+            nextMaintenance: vehicle.nextMaintenanceDate || "",
+          });
+        }
       }
 
       // Alert de expiração do registro
       if (vehicle.registrationExpiry) {
         const expiryDate = new Date(vehicle.registrationExpiry);
-        const daysUntil = daysUntilDue(expiryDate);
-        const status = calculateStatus(expiryDate);
-        const priority = calculatePriority(daysUntil);
+        if (isDateRelevant(expiryDate)) {
+          const daysUntil = daysUntilDue(expiryDate);
+          const status = calculateStatus(expiryDate);
+          const priority = calculatePriority(daysUntil);
 
-        alerts.push({
-          id: `registration-${vehicle.id}-${alertIdCounter++}`,
-          vehicleId: vehicle.id,
-          vehicleName,
-          licensePlate: vehicle.licensePlate,
-          alertType: "date",
-          currentValue: 0,
-          limitValue: 0,
-          dueDate: vehicle.registrationExpiry,
-          status,
-          priority,
-          description: "Expiração do registro",
-          lastMaintenance,
-          nextMaintenance: vehicle.nextMaintenanceDate || "",
-        });
+          alerts.push({
+            id: `registration-${vehicle.id}-${alertIdCounter++}`,
+            vehicleId: vehicle.id,
+            vehicleName,
+            licensePlate: vehicle.licensePlate,
+            alertType: "date",
+            currentValue: 0,
+            limitValue: 0,
+            dueDate: vehicle.registrationExpiry,
+            status,
+            priority,
+            description: "Expiração do registro",
+            lastMaintenance,
+            nextMaintenance: vehicle.nextMaintenanceDate || "",
+          });
+        }
       }
     });
 
@@ -349,14 +378,30 @@ const VehicleAlert: React.FC = () => {
     }
   };
 
-  const handleViewDetails = (alertId: string) => {
+  const handleViewDetails = async (alertId: string) => {
     const alert = alerts.find((a) => a.id === alertId);
     if (alert && alert.vehicleId) {
-      // Navegar para detalhes do veículo quando a rota estiver disponível
-      // Por enquanto, apenas log
-      console.log("View details for vehicle:", alert.vehicleId);
-      // navigate(`/admin/vehicles/${alert.vehicleId}`);
+      setSelectedAlert(alert);
+      setLoadingVehicle(true);
+      setIsModalOpen(true);
+
+      try {
+        const vehicle = await vehicleService.getVehicleById(alert.vehicleId);
+        setSelectedVehicle(vehicle);
+      } catch (error) {
+        console.error("Erro ao carregar detalhes do veículo:", error);
+        setSelectedVehicle(null);
+      } finally {
+        setLoadingVehicle(false);
+      }
     }
+  };
+
+  const handleCloseModal = () => {
+    setSelectedAlert(null);
+    setSelectedVehicle(null);
+    setIsModalOpen(false);
+    setLoadingVehicle(false);
   };
 
   if (loading) {
@@ -531,6 +576,225 @@ const VehicleAlert: React.FC = () => {
           ))
         )}
       </div>
+
+      {/* Modal de Detalhes */}
+      {isModalOpen && selectedAlert && (
+        <div className="modal-overlay" onClick={handleCloseModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Vehicle Alert Details</h2>
+              <button className="close-button" onClick={handleCloseModal}>
+                X
+              </button>
+            </div>
+
+            <div className="modal-body">
+              {loadingVehicle ? (
+                <div className="loading">
+                  <div className="loading-spinner"></div>
+                  <p>Loading vehicle details...</p>
+                </div>
+              ) : (
+                <>
+                  <div className="vehicle-info-section">
+                    <h3>{selectedAlert.vehicleName}</h3>
+                    <p className="license-info">
+                      License Plate: {selectedAlert.licensePlate}
+                    </p>
+                    <div className="status-priority-row">
+                      <div
+                        className="status-badge"
+                        style={{
+                          backgroundColor:
+                            selectedAlert.status === "overdue"
+                              ? "#ef4444"
+                              : selectedAlert.status === "pending"
+                              ? "#f59e0b"
+                              : "#10b981",
+                        }}
+                      >
+                        {getStatusIcon(selectedAlert.status)}
+                        <span>{selectedAlert.status.toUpperCase()}</span>
+                      </div>
+                      <div
+                        className="priority-badge"
+                        style={{
+                          backgroundColor: getPriorityColor(selectedAlert.priority),
+                        }}
+                      >
+                        {selectedAlert.priority.toUpperCase()}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="alert-details-grid">
+                    <div className="detail-item">
+                      <label>Alert Type:</label>
+                      <span>{selectedAlert.description}</span>
+                    </div>
+                    <div className="detail-item">
+                      <label>Due Date:</label>
+                      <span>{new Date(selectedAlert.dueDate).toLocaleDateString()}</span>
+                    </div>
+                    <div className="detail-item">
+                      <label>Alert Type:</label>
+                      <span>{selectedAlert.alertType.toUpperCase()}</span>
+                    </div>
+                    {selectedAlert.lastMaintenance && (
+                      <div className="detail-item">
+                        <label>Last Maintenance:</label>
+                        <span>
+                          {new Date(selectedAlert.lastMaintenance).toLocaleDateString()}
+                        </span>
+                      </div>
+                    )}
+                    {selectedAlert.nextMaintenance && (
+                      <div className="detail-item">
+                        <label>Next Maintenance:</label>
+                        <span>
+                          {new Date(selectedAlert.nextMaintenance).toLocaleDateString()}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {selectedVehicle && (
+                    <>
+                      <div className="vehicle-details-section">
+                        <h4>Vehicle Information</h4>
+                        <div className="vehicle-details-grid">
+                          <div className="detail-item">
+                            <label>Vehicle Type:</label>
+                            <span>{selectedVehicle.vehicleType || "N/A"}</span>
+                          </div>
+                          <div className="detail-item">
+                            <label>Year:</label>
+                            <span>{selectedVehicle.year || "N/A"}</span>
+                          </div>
+                          <div className="detail-item">
+                            <label>VIN:</label>
+                            <span>{selectedVehicle.vin || "N/A"}</span>
+                          </div>
+                          <div className="detail-item">
+                            <label>Color:</label>
+                            <span>{selectedVehicle.color || "N/A"}</span>
+                          </div>
+                          <div className="detail-item">
+                            <label>Fuel Type:</label>
+                            <span>{selectedVehicle.fuelType || "N/A"}</span>
+                          </div>
+                          <div className="detail-item">
+                            <label>Mileage:</label>
+                            <span>
+                              {selectedVehicle.mileage
+                                ? `${selectedVehicle.mileage.toLocaleString()} km`
+                                : "N/A"}
+                            </span>
+                          </div>
+                          <div className="detail-item">
+                            <label>Status:</label>
+                            <span>{selectedVehicle.status || "N/A"}</span>
+                          </div>
+                          <div className="detail-item">
+                            <label>Location:</label>
+                            <span>{selectedVehicle.location || "N/A"}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {(selectedVehicle.insuranceExpiry ||
+                        selectedVehicle.registrationExpiry ||
+                        selectedVehicle.dotRenewalDate ||
+                        selectedVehicle.licensePlateRenewalDate) && (
+                        <div className="vehicle-dates-section">
+                          <h4>Important Dates</h4>
+                          <div className="vehicle-dates-grid">
+                            {selectedVehicle.insuranceExpiry && (
+                              <div className="detail-item">
+                                <label>Insurance Expiry:</label>
+                                <span>
+                                  {new Date(
+                                    selectedVehicle.insuranceExpiry
+                                  ).toLocaleDateString()}
+                                </span>
+                              </div>
+                            )}
+                            {selectedVehicle.registrationExpiry && (
+                              <div className="detail-item">
+                                <label>Registration Expiry:</label>
+                                <span>
+                                  {new Date(
+                                    selectedVehicle.registrationExpiry
+                                  ).toLocaleDateString()}
+                                </span>
+                              </div>
+                            )}
+                            {selectedVehicle.dotRenewalDate && (
+                              <div className="detail-item">
+                                <label>DOT Renewal:</label>
+                                <span>
+                                  {new Date(
+                                    selectedVehicle.dotRenewalDate
+                                  ).toLocaleDateString()}
+                                </span>
+                              </div>
+                            )}
+                            {selectedVehicle.licensePlateRenewalDate && (
+                              <div className="detail-item">
+                                <label>License Plate Renewal:</label>
+                                <span>
+                                  {new Date(
+                                    selectedVehicle.licensePlateRenewalDate
+                                  ).toLocaleDateString()}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {selectedVehicle.notes && (
+                        <div className="notes-section">
+                          <label>Notes:</label>
+                          <p>{selectedVehicle.notes}</p>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </>
+              )}
+            </div>
+
+            <div className="modal-footer">
+              <button
+                className="action-button secondary"
+                onClick={handleCloseModal}
+              >
+                Close
+              </button>
+              {selectedVehicle && (
+                <button
+                  className="action-button secondary"
+                  onClick={() => navigate("/admin/cadastro-veiculos")}
+                >
+                  View Vehicle
+                </button>
+              )}
+              {selectedAlert && selectedAlert.status !== "completed" && (
+                <button
+                  className="action-button primary"
+                  onClick={() => {
+                    handleMarkAsCompleted(selectedAlert.id);
+                    handleCloseModal();
+                  }}
+                >
+                  Mark Complete
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

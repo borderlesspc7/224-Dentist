@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import "./Managment.css";
 import DataTable from "../../../components/ui/DataTable/DataTable";
+import ViewModal from "../../../components/ui/ViewModal/ViewModal";
 import { useDashboardData } from "../../../hooks/useDashboardData";
 import {
   UsersIcon,
@@ -138,6 +139,17 @@ export default function Dashboard() {
   }>({
     isOpen: false,
     record: null,
+  });
+  const [viewModal, setViewModal] = useState<{
+    isOpen: boolean;
+    data: Record<string, any> | null;
+    title: string;
+    loading: boolean;
+  }>({
+    isOpen: false,
+    data: null,
+    title: "",
+    loading: false,
   });
 
   // Filter sections based on user permissions
@@ -327,12 +339,126 @@ export default function Dashboard() {
     }
   };
 
-  const handleView = (record: Record<string, unknown>) => {
-    console.log("View record:", record);
-    // Navegar para a página de visualização (pode ser implementado depois)
-    alert(
-      `Visualizando ${record.name} (ID: ${record.id})\n\nFuncionalidade de visualização será implementada em breve.`
-    );
+  const handleView = async (record: Record<string, unknown>) => {
+    if (!selectedSection) {
+      showError("Erro", "Seção não selecionada");
+      return;
+    }
+
+    const recordId = String(record.id);
+    const recordName = String(record.name || record.displayName || record.fullName || "Record");
+
+    // Abrir modal com loading
+    setViewModal({
+      isOpen: true,
+      data: null,
+      title: `View ${recordName}`,
+      loading: true,
+    });
+
+    try {
+      let fullData: Record<string, any> | null = null;
+
+      // Importar serviços dinamicamente e buscar dados completos
+      switch (selectedSection) {
+        case "users": {
+          const { userService } = await import("../../../services/userService");
+          fullData = await userService.getUserById(recordId);
+          break;
+        }
+        case "clients": {
+          const { clientService } = await import("../../../services/clientService");
+          fullData = await clientService.getClientById(recordId);
+          break;
+        }
+        case "services": {
+          const { serviceService } = await import("../../../services/serviceService");
+          fullData = await serviceService.getServiceById(recordId);
+          break;
+        }
+        case "employees": {
+          const { employeeService } = await import("../../../services/employeeService");
+          fullData = await employeeService.getEmployeeById(recordId);
+          break;
+        }
+        case "subcontractors": {
+          const { subcontractorService } = await import("../../../services/subcontractorService");
+          fullData = await subcontractorService.getSubcontractorById(recordId);
+          break;
+        }
+        case "contract-services": {
+          const { contractServiceService } = await import("../../../services/contractServiceService");
+          fullData = await contractServiceService.getContractServiceById(recordId);
+          break;
+        }
+        case "financings": {
+          const { financingService } = await import("../../../services/financingService");
+          fullData = await financingService.getFinancingById(recordId);
+          break;
+        }
+        case "vehicles": {
+          const { vehicleService } = await import("../../../services/vehicleService");
+          fullData = await vehicleService.getVehicleById(recordId);
+          break;
+        }
+        case "bank-accounts": {
+          const { bankAccountService } = await import("../../../services/bankAccountService");
+          fullData = await bankAccountService.getBankAccountById(recordId);
+          break;
+        }
+        case "credit-cards": {
+          const { creditCardService } = await import("../../../services/creditCardService");
+          fullData = await creditCardService.getCreditCardById(recordId);
+          break;
+        }
+        case "expense-types": {
+          const { expenseTypeService } = await import("../../../services/expenseTypeService");
+          fullData = await expenseTypeService.getExpenseTypeById(recordId);
+          break;
+        }
+        case "service-pricing": {
+          const { servicePricingService } = await import("../../../services/servicePricingService");
+          fullData = await servicePricingService.getServicePricingById(recordId);
+          break;
+        }
+        default:
+          throw new Error("Tipo de seção desconhecido");
+      }
+
+      if (!fullData) {
+        throw new Error("Registro não encontrado");
+      }
+
+      // Converter datas do Firestore para objetos Date se necessário
+      const processedData: Record<string, any> = {};
+      for (const [key, value] of Object.entries(fullData)) {
+        if (value && typeof value === "object" && "toDate" in value && typeof value.toDate === "function") {
+          processedData[key] = value.toDate();
+        } else {
+          processedData[key] = value;
+        }
+      }
+
+      // Atualizar modal com dados
+      setViewModal({
+        isOpen: true,
+        data: processedData,
+        title: `View ${recordName}`,
+        loading: false,
+      });
+    } catch (error) {
+      console.error("Error loading record details:", error);
+      showError(
+        "Erro",
+        `Falha ao carregar detalhes: ${error instanceof Error ? error.message : "Erro desconhecido"}`
+      );
+      setViewModal({
+        isOpen: false,
+        data: null,
+        title: "",
+        loading: false,
+      });
+    }
   };
 
   const handleEdit = (record: Record<string, unknown>) => {
@@ -540,6 +666,22 @@ export default function Dashboard() {
         confirmText="Excluir"
         cancelText="Cancelar"
         type="danger"
+      />
+
+      {/* View Modal */}
+      <ViewModal
+        isOpen={viewModal.isOpen}
+        onClose={() =>
+          setViewModal({
+            isOpen: false,
+            data: null,
+            title: "",
+            loading: false,
+          })
+        }
+        title={viewModal.title}
+        data={viewModal.data || {}}
+        loading={viewModal.loading}
       />
     </div>
   );

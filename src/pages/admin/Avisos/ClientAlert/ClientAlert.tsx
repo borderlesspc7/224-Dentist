@@ -23,6 +23,8 @@ const ClientAlert: React.FC = () => {
     []
   );
   const [loading, setLoading] = useState(true);
+  const [selectedAlert, setSelectedAlert] = useState<ClientPaymentAlert | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<
     "all" | "pending" | "overdue" | "paid" | "cancelled"
@@ -167,8 +169,16 @@ const ClientAlert: React.FC = () => {
   };
 
   const handleViewDetails = (alertId: string) => {
-    // Implementar modal de detalhes
-    console.log("View details for alert:", alertId);
+    const alert = alerts.find((a) => a.id === alertId);
+    if (alert) {
+      setSelectedAlert(alert);
+      setIsModalOpen(true);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setSelectedAlert(null);
+    setIsModalOpen(false);
   };
 
   if (loading) {
@@ -372,6 +382,136 @@ const ClientAlert: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Modal de Detalhes */}
+      {isModalOpen && selectedAlert && (
+        <div className="modal-overlay" onClick={handleCloseModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Payment Details</h2>
+              <button className="close-button" onClick={handleCloseModal}>
+                X
+              </button>
+            </div>
+
+            <div className="modal-body">
+              <div className="client-info-section">
+                <h3>{selectedAlert.clientName}</h3>
+                <p className="invoice-info">
+                  Invoice: {selectedAlert.invoiceNumber}
+                </p>
+                <div className="status-priority-row">
+                  <div
+                    className="status-badge"
+                    style={{
+                      backgroundColor: getStatusColor(selectedAlert.status),
+                    }}
+                  >
+                    {getStatusIcon(selectedAlert.status)}
+                    <span>{selectedAlert.status.toUpperCase()}</span>
+                  </div>
+                  <div
+                    className="priority-badge"
+                    style={{
+                      backgroundColor: getPriorityColor(selectedAlert.priority),
+                    }}
+                  >
+                    {selectedAlert.priority.toUpperCase()}
+                  </div>
+                </div>
+              </div>
+
+              <div className="payment-details-grid">
+                <div className="detail-item">
+                  <label>Amount:</label>
+                  <span className="amount-large">
+                    {formatCurrency(selectedAlert.amount)}
+                  </span>
+                </div>
+                <div className="detail-item">
+                  <label>Due Date:</label>
+                  <span>{selectedAlert.dueDate}</span>
+                </div>
+                <div className="detail-item">
+                  <label>Payment Method:</label>
+                  <span>{selectedAlert.paymentMethod.toUpperCase()}</span>
+                </div>
+                <div className="detail-item">
+                  <label>Client ID:</label>
+                  <span>{selectedAlert.clientId}</span>
+                </div>
+                <div className="detail-item">
+                  <label>Days Overdue:</label>
+                  <span className={calculateDaysOverdue(selectedAlert.dueDate) > 0 ? "overdue" : "normal"}>
+                    {calculateDaysOverdue(selectedAlert.dueDate) > 0
+                      ? `${calculateDaysOverdue(selectedAlert.dueDate)} days`
+                      : `Due in ${Math.abs(calculateDaysOverdue(selectedAlert.dueDate))} days`}
+                  </span>
+                </div>
+                <div className="detail-item">
+                  <label>Reminder Count:</label>
+                  <span>{selectedAlert.reminderCount || 0}</span>
+                </div>
+                {selectedAlert.lastReminder && (
+                  <div className="detail-item">
+                    <label>Last Reminder:</label>
+                    <span>{selectedAlert.lastReminder}</span>
+                  </div>
+                )}
+                {selectedAlert.contractServiceId && (
+                  <div className="detail-item">
+                    <label>Contract Service ID:</label>
+                    <span>{selectedAlert.contractServiceId}</span>
+                  </div>
+                )}
+              </div>
+
+              {selectedAlert.description && (
+                <div className="description-section">
+                  <label>Description:</label>
+                  <p>{selectedAlert.description}</p>
+                </div>
+              )}
+            </div>
+
+            <div className="modal-footer">
+              <button
+                className="action-button secondary"
+                onClick={handleCloseModal}
+              >
+                Close
+              </button>
+              <button
+                className="action-button secondary"
+                onClick={() => navigate("/admin/cadastro-clientes")}
+              >
+                View Client
+              </button>
+              {selectedAlert.status !== "paid" && (
+                <>
+                  <button
+                    className="action-button warning"
+                    onClick={() => {
+                      handleSendReminder(selectedAlert.id);
+                    }}
+                  >
+                    Send Reminder
+                  </button>
+                  <button
+                    className="action-button primary"
+                    onClick={() => {
+                      hanldeMarkAsPaid(selectedAlert.id);
+                      handleCloseModal();
+                    }}
+                  >
+                    Mark as Paid
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
