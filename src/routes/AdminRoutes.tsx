@@ -24,6 +24,7 @@ import Users from "../pages/admin/User/User";
 import Reports from "../pages/admin/Reports/Reports";
 import Dashboard from "../pages/admin/Dashboard/Dashboard";
 import NoPermissions from "../pages/admin/NoPermissions/NoPermissions";
+import Audit from "../pages/admin/Audit/Audit";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { PERMISSIONS } from "../config/permissions";
 
@@ -39,6 +40,7 @@ export default function AdminRoutes() {
         <Route path="avisos" element={<ProtectedRoute required={PERMISSIONS.ALERTS}><Avisos /></ProtectedRoute>} />
         <Route path="users" element={<ProtectedRoute required={PERMISSIONS.USERS}><Users /></ProtectedRoute>} />
         <Route path="relatorios" element={<ProtectedRoute required={PERMISSIONS.REPORTS}><Reports /></ProtectedRoute>} />
+        <Route path="audit" element={<ProtectedRoute required={PERMISSIONS.AUDIT}><Audit /></ProtectedRoute>} />
         <Route path="manutencao-veiculos" element={<ProtectedRoute required={PERMISSIONS.ALERT_VEHICLE}><VehicleAlert /></ProtectedRoute>} />
 
         <Route path="termino-projeto" element={<ProtectedRoute required={PERMISSIONS.ALERT_PROJECT}><ProjectAlert /></ProtectedRoute>} />

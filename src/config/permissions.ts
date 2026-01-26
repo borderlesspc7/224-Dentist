@@ -35,6 +35,9 @@ export const PERMISSIONS = {
 
   // Users Management
   USERS: "users",
+
+  // Audit
+  AUDIT: "audit",
 } as const;
 
 export type Permission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
@@ -67,6 +70,7 @@ export const PERMISSION_LABELS: Record<Permission, string> = {
   [PERMISSIONS.ALERT_CONTRACT_SERVICE]:
     "Alerta de Pagamento de Serviços Contratados",
   [PERMISSIONS.USERS]: "Gerenciamento de Usuários",
+  [PERMISSIONS.AUDIT]: "Histórico de Auditoria",
 };
 
 /**
@@ -117,6 +121,11 @@ export const PERMISSION_GROUPS = [
     id: "users",
     name: "Usuários",
     permissions: [PERMISSIONS.USERS],
+  },
+  {
+    id: "audit",
+    name: "Auditoria",
+    permissions: [PERMISSIONS.AUDIT],
   },
 ];
 

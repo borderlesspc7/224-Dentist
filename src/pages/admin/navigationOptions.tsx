@@ -5,6 +5,7 @@ import {
   UserIcon,
   BellIcon,
   FilesIcon,
+  HistoryIcon,
 } from "lucide-react";
 import { PERMISSIONS, type Permission } from "../../config/permissions";
 
@@ -51,5 +52,11 @@ export const pathOptions: PathOption[] = [
     label: "Reports",
     icon: <BarChart3Icon />,
     permission: PERMISSIONS.REPORTS,
+  },
+  {
+    value: "audit",
+    label: "Audit History",
+    icon: <HistoryIcon />,
+    permission: PERMISSIONS.AUDIT,
   },
 ];
